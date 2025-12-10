@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사업제안서: MINI FARM STUDIO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons Script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.min.js"></script>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            -webkit-print-color-adjust: exact;
+        }
+        .page-container {
+            max-width: 210mm; /* A4 Width */
+            margin: 40px auto;
+            background: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .section-break {
+            page-break-before: always;
+        }
+        @media print {
+            body {
+                background-color: white;
+            }
+            .page-container {
+                box-shadow: none;
+                margin: 0;
+                width: 100%;
+                max-width: none;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .page-break {
+                page-break-after: always;
+            }
+        }
+        .accent-bg {
+            background-color: #166534; /* Green-800 */
+        }
+        .accent-text {
+            color: #166534;
+        }
+        .sub-accent-bg {
+            background-color: #f0fdf4; /* Green-50 */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Control Bar -->
+    <div class="fixed top-0 left-0 w-full bg-gray-900 text-white p-4 z-50 flex justify-between items-center no-print shadow-lg">
+        <span class="font-bold text-lg">MINI FARM STUDIO 사업제안서</span>
+        <button onclick="window.print()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-bold flex items-center gap-2 transition">
+            <i data-lucide="printer"></i> PDF 저장 / 인쇄
+        </button>
+    </div>
+
+    <!-- Padding for fixed header -->
+    <div class="h-20 no-print"></div>
+
+    <!-- COVER PAGE -->
+    <div class="page-container p-0 overflow-hidden relative min-h-[297mm] flex flex-col page-break">
+        <div class="h-2/3 accent-bg flex flex-col justify-center px-16 relative">
+            <div class="absolute top-0 right-0 p-10 opacity-10">
+                <i data-lucide="sprout" size="400" color="white"></i>
+            </div>
+            <h2 class="text-green-300 text-2xl font-medium mb-4 tracking-widest">PROJECT PROPOSAL</h2>
+            <h1 class="text-white text-6xl font-black leading-tight mb-6">
+                도심형<br>스마트팜 스튜디오<br>
+                <span class="text-green-300">MINI FARM</span>
+            </h1>
+            <div class="w-24 h-2 bg-white mb-8"></div>
+            <p class="text-green-100 text-xl font-light leading-relaxed">
+                부산대 상권 공실 문제 해결 및<br>
+                지속 가능한 미래형 임대 수익 모델 제안
+            </p>
+        </div>
+        <div class="h-1/3 bg-white flex flex-col justify-center px-16">
+            <div class="grid grid-cols-2 gap-8">
+                <div>
+                    <p class="text-gray-500 text-sm font-bold mb-1">제안 대상</p>
+                    <p class="text-xl font-bold text-gray-800">부산 금정구 부산대 인근 상가 건물주 귀하</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-sm font-bold mb-1">제안 일자</p>
+                    <p class="text-xl font-bold text-gray-800" id="current-date">202X. XX. XX</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-sm font-bold mb-1">제안자</p>
+                    <p class="text-xl font-bold text-gray-800">[제안자 성명]</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-sm font-bold mb-1">연락처</p>
+                    <p class="text-xl font-bold text-gray-800">[010-XXXX-XXXX]</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 1: OVERVIEW & BACKGROUND -->
+    <div class="page-container p-16 page-break">
+        <div class="border-b-4 border-green-800 pb-4 mb-12">
+            <h2 class="text-3xl font-bold accent-text">1. 사업 개요 및 배경</h2>
+        </div>
+
+        <div class="mb-12">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <i data-lucide="target" class="text-green-600"></i> 프로젝트 배경
+            </h3>
+            <p class="text-gray-600 leading-relaxed mb-6">
+                부산대 인근 상권은 2층 이상 공실이 증가하며 건물주의 임대수익 감소가 지속되고 있습니다.
+                동시에 도시민들은 힐링, 취미, 자급자족, 교육이라는 새로운 경험을 원하고 있습니다.
+                본 프로젝트는 도심의 공실을 <strong>‘스마트팜 기반 도시 농업 스튜디오’</strong>로 재탄생시켜
+                안정적 임대수익과 지속 가능한 미래형 업종을 창출하는 사업입니다.
+            </p>
+        </div>
+
+        <div class="bg-gray-100 p-8 rounded-xl mb-12">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <i data-lucide="flag" class="text-green-600"></i> 사업 목표
+            </h3>
+            <ul class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <li class="flex items-start gap-3">
+                    <div class="bg-green-600 text-white p-1 rounded-full mt-1"><i data-lucide="check" size="14"></i></div>
+                    <span class="text-gray-700"><strong>공실 해결:</strong> 지속 수익 창출 공간으로 전환</span>
+                </li>
+                <li class="flex items-start gap-3">
+                    <div class="bg-green-600 text-white p-1 rounded-full mt-1"><i data-lucide="check" size="14"></i></div>
+                    <span class="text-gray-700"><strong>가치 제공:</strong> 도시민에게 취미·힐링·교육 공간 제공</span>
+                </li>
+                <li class="flex items-start gap-3">
+                    <div class="bg-green-600 text-white p-1 rounded-full mt-1"><i data-lucide="check" size="14"></i></div>
+                    <span class="text-gray-700"><strong>수익 모델:</strong> 장비·모종·양액 등 반복 매출 구축</span>
+                </li>
+                <li class="flex items-start gap-3">
+                    <div class="bg-green-600 text-white p-1 rounded-full mt-1"><i data-lucide="check" size="14"></i></div>
+                    <span class="text-gray-700"><strong>확장성:</strong> 프랜차이즈 및 가정용 시장 진출 기반</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="mb-8">
+            <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <i data-lucide="cloud-rain" class="text-green-600"></i> 환경 변화와 스마트팜의 필요성
+            </h3>
+            <div class="grid grid-cols-2 gap-8">
+                <div class="bg-red-50 p-6 rounded-lg border border-red-100">
+                    <h4 class="font-bold text-red-800 mb-2">기존 노지 재배의 위기</h4>
+                    <ul class="text-sm text-gray-600 space-y-2 list-disc list-inside">
+                        <li>이상 고온·저온으로 생육 불안정</li>
+                        <li>폭우, 스콜성 집중호우로 인한 침수</li>
+                        <li>미세먼지, 대기오염에 의한 품질 저하</li>
+                        <li>예측 불가능한 고위험 산업화</li>
+                    </ul>
+                </div>
+                <div class="bg-green-50 p-6 rounded-lg border border-green-100">
+                    <h4 class="font-bold text-green-800 mb-2">스마트팜 솔루션</h4>
+                    <ul class="text-sm text-gray-600 space-y-2 list-disc list-inside">
+                        <li><strong>100% 실내 재배:</strong> 기후 영향 Zero</li>
+                        <li><strong>자동 제어:</strong> 온도, 습도, 조도, 양액</li>
+                        <li><strong>무농약:</strong> 외부 오염 차단, 균일 품질</li>
+                        <li><strong>도심 트렌드:</strong> 자급자족 니즈 충족</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 2: PROPOSAL DETAILS -->
+    <div class="page-container p-16 page-break">
+        <div class="border-b-4 border-green-800 pb-4 mb-12">
+            <h2 class="text-3xl font-bold accent-text">2. 사업 제안 내용 (Concept)</h2>
+        </div>
+
+        <div class="text-center mb-12">
+            <span class="inline-block bg-green-100 text-green-800 px-4 py-2 rounded-full font-bold text-sm mb-4">Core Concept</span>
+            <h3 class="text-2xl font-bold text-gray-800 leading-snug">
+                “도심 공실을 <span class="text-green-600">초록색 힐링 농장</span>으로 바꾸고<br>
+                누구나 <span class="text-green-600">도시 농부</span>가 될 수 있는 공간을 만든다.”
+            </h3>
+        </div>
+
+        <div class="grid grid-cols-2 gap-8 mb-12">
+            <div class="bg-gray-100 rounded-xl h-64 flex items-center justify-center overflow-hidden relative border border-gray-200">
+                <!-- SVG Illustration of Smart Farm (Replaces broken image) -->
+                <svg class="w-full h-full object-cover" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="growLight" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#d8b4fe;stop-opacity:0.8" />
+                            <stop offset="100%" style="stop-color:#f3e8ff;stop-opacity:0" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="800" height="600" fill="#f9fafb"/>
+                    
+                    <!-- Back Wall Frame -->
+                    <rect x="100" y="100" width="600" height="400" rx="10" fill="#ffffff" stroke="#e5e7eb" stroke-width="2"/>
+                    
+                    <!-- Smart Farm Rack Left -->
+                    <g transform="translate(150, 150)">
+                        <rect x="0" y="0" width="150" height="300" rx="5" fill="#f3f4f6" stroke="#9ca3af" stroke-width="2"/>
+                        <g transform="translate(10, 20)">
+                            <rect x="0" y="0" width="130" height="4" fill="#64748b"/>
+                            <path d="M10,0 Q15,-15 20,0 T30,0 T40,0 T50,0 T60,0 T70,0 T80,0 T90,0 T100,0 T110,0" stroke="#16a34a" stroke-width="3" fill="none"/>
+                            <rect x="0" y="-10" width="130" height="2" fill="#c084fc"/>
+                            <rect x="0" y="-10" width="130" height="20" fill="url(#growLight)" opacity="0.3"/>
+                        </g>
+                         <g transform="translate(10, 90)">
+                            <rect x="0" y="0" width="130" height="4" fill="#64748b"/>
+                             <path d="M10,0 Q15,-20 20,0 T30,0 T40,0 T50,0 T60,0 T70,0 T80,0 T90,0 T100,0 T110,0" stroke="#16a34a" stroke-width="4" fill="none"/>
+                            <rect x="0" y="-10" width="130" height="2" fill="#c084fc"/>
+                            <rect x="0" y="-10" width="130" height="20" fill="url(#growLight)" opacity="0.3"/>
+                        </g>
+                         <g transform="translate(10, 160)">
+                            <rect x="0" y="0" width="130" height="4" fill="#64748b"/>
+                             <path d="M10,0 Q15,-15 20,0 T30,0 T40,0 T50,0 T60,0 T70,0 T80,0 T90,0 T100,0 T110,0" stroke="#16a34a" stroke-width="3" fill="none"/>
+                            <rect x="0" y="-10" width="130" height="2" fill="#c084fc"/>
+                            <rect x="0" y="-10" width="130" height="20" fill="url(#growLight)" opacity="0.3"/>
+                        </g>
+                         <g transform="translate(10, 230)">
+                            <rect x="0" y="0" width="130" height="4" fill="#64748b"/>
+                             <path d="M10,0 Q15,-10 20,0 T30,0 T40,0 T50,0 T60,0 T70,0 T80,0 T90,0 T100,0 T110,0" stroke="#16a34a" stroke-width="3" fill="none"/>
+                            <rect x="0" y="-10" width="130" height="2" fill="#c084fc"/>
+                            <rect x="0" y="-10" width="130" height="20" fill="url(#growLight)" opacity="0.3"/>
+                        </g>
+                    </g>
+
+                    <!-- Smart Farm Rack Right -->
+                    <g transform="translate(500, 150)">
+                        <rect x="0" y="0" width="150" height="300" rx="5" fill="#f3f4f6" stroke="#9ca3af" stroke-width="2"/>
+                        <g transform="translate(10, 20)">
+                            <rect x="0" y="0" width="130" height="4" fill="#64748b"/>
+                             <path d="M10,0 Q15,-15 20,0 T30,0 T40,0 T50,0 T60,0 T70,0 T80,0 T90,0 T100,0 T110,0" stroke="#15803d" stroke-width="3" fill="none"/>
+                            <rect x="0" y="-10" width="130" height="2" fill="#c084fc"/>
+                             <rect x="0" y="-10" width="130" height="20" fill="url(#growLight)" opacity="0.3"/>
+                        </g>
+                         <g transform="translate(10, 90)">
+                            <rect x="0" y="0" width="130" height="4" fill="#64748b"/>
+                             <path d="M10,0 Q15,-20 20,0 T30,0 T40,0 T50,0 T60,0 T70,0 T80,0 T90,0 T100,0 T110,0" stroke="#15803d" stroke-width="4" fill="none"/>
+                            <rect x="0" y="-10" width="130" height="2" fill="#c084fc"/>
+                             <rect x="0" y="-10" width="130" height="20" fill="url(#growLight)" opacity="0.3"/>
+                        </g>
+                         <g transform="translate(10, 160)">
+                            <rect x="0" y="0" width="130" height="4" fill="#64748b"/>
+                             <path d="M10,0 Q15,-15 20,0 T30,0 T40,0 T50,0 T60,0 T70,0 T80,0 T90,0 T100,0 T110,0" stroke="#15803d" stroke-width="3" fill="none"/>
+                            <rect x="0" y="-10" width="130" height="2" fill="#c084fc"/>
+                             <rect x="0" y="-10" width="130" height="20" fill="url(#growLight)" opacity="0.3"/>
+                        </g>
+                         <g transform="translate(10, 230)">
+                            <rect x="0" y="0" width="130" height="4" fill="#64748b"/>
+                             <path d="M10,0 Q15,-10 20,0 T30,0 T40,0 T50,0 T60,0 T70,0 T80,0 T90,0 T100,0 T110,0" stroke="#15803d" stroke-width="3" fill="none"/>
+                            <rect x="0" y="-10" width="130" height="2" fill="#c084fc"/>
+                             <rect x="0" y="-10" width="130" height="20" fill="url(#growLight)" opacity="0.3"/>
+                        </g>
+                    </g>
+
+                    <!-- Center Label -->
+                    <circle cx="400" cy="300" r="40" fill="#4ade80" opacity="0.1"/>
+                    <text x="400" y="470" font-family="sans-serif" font-size="14" text-anchor="middle" fill="#6b7280" font-weight="bold">MINI FARM STUDIO 전경 (예시)</text>
+                </svg>
+            </div>
+            <div class="flex flex-col justify-center">
+                <h4 class="text-xl font-bold text-gray-800 mb-3">도심 속 스마트팜 체험·운영 공간</h4>
+                <p class="text-gray-600 mb-4">
+                    부산대 인근 2층 이상 공실층에 실내 수직농장(Vertical Farm) 설비를 설치하여,
+                    개인, 가족, 동호인들이 자신만의 텃밭을 가꿀 수 있는 구독형 스튜디오입니다.
+                </p>
+                <div class="flex gap-2">
+                    <span class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded">#힐링</span>
+                    <span class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded">#교육</span>
+                    <span class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded">#구독경제</span>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="text-xl font-bold text-gray-800 mb-6 border-l-4 border-green-600 pl-4">공간 구성 계획</h3>
+        <div class="grid grid-cols-2 gap-6">
+            <div class="border border-gray-200 p-5 rounded-lg shadow-sm hover:shadow-md transition">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="bg-green-100 p-2 rounded-lg text-green-700"><i data-lucide="layout-grid"></i></div>
+                    <h4 class="font-bold text-lg">1) 스마트팜 재배구역</h4>
+                </div>
+                <p class="text-sm text-gray-600">스마트팜 랙 10~30대 설치 / 사용자별 지정 구역(월간 구독) / 잎채소, 허브, 특수채소 재배</p>
+            </div>
+            <div class="border border-gray-200 p-5 rounded-lg shadow-sm hover:shadow-md transition">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="bg-green-100 p-2 rounded-lg text-green-700"><i data-lucide="coffee"></i></div>
+                    <h4 class="font-bold text-lg">2) 커뮤니티 라운지</h4>
+                </div>
+                <p class="text-sm text-gray-600">사용자 소통 공간 / 무료 커피 및 티 제공 / 작물 나눔(Share) 존 / 재배 정보 교류</p>
+            </div>
+            <div class="border border-gray-200 p-5 rounded-lg shadow-sm hover:shadow-md transition">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="bg-green-100 p-2 rounded-lg text-green-700"><i data-lucide="graduation-cap"></i></div>
+                    <h4 class="font-bold text-lg">3) 클래스·교육 공간</h4>
+                </div>
+                <p class="text-sm text-gray-600">사용법 강의 / 어린이 자연 교육 / "내 작물로 샌드위치 만들기" 등 쿠킹 클래스</p>
+            </div>
+            <div class="border border-gray-200 p-5 rounded-lg shadow-sm hover:shadow-md transition">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="bg-green-100 p-2 rounded-lg text-green-700"><i data-lucide="smile"></i></div>
+                    <h4 class="font-bold text-lg">4) 가족 힐링·체험 구역</h4>
+                </div>
+                <p class="text-sm text-gray-600">주말 가족 프로그램 / 아이와 함께하는 교육형 텃밭 / 주기적 체험 행사 운영</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 3: BUSINESS MODEL & BENEFITS -->
+    <div class="page-container p-16 page-break">
+        <div class="border-b-4 border-green-800 pb-4 mb-12">
+            <h2 class="text-3xl font-bold accent-text">3. 비즈니스 모델 및 기대 효과</h2>
+        </div>
+
+        <div class="grid grid-cols-3 gap-6 mb-12">
+            <!-- BM Card 1 -->
+            <div class="bg-white border border-gray-200 rounded-xl p-6 text-center shadow-sm">
+                <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600">
+                    <i data-lucide="calendar-check"></i>
+                </div>
+                <h4 class="font-bold text-lg mb-2">구독 및 대여</h4>
+                <p class="text-sm text-gray-600">월간/연간 랙 임대료<br>프리미엄 케어 서비스<br>학생 할인 모델</p>
+            </div>
+            <!-- BM Card 2 -->
+            <div class="bg-white border border-gray-200 rounded-xl p-6 text-center shadow-sm">
+                <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600">
+                    <i data-lucide="shopping-bag"></i>
+                </div>
+                <h4 class="font-bold text-lg mb-2">물품 판매</h4>
+                <p class="text-sm text-gray-600">모종, 양액, 재배 키트<br>가정용 기기 판매<br>정기 배송 패키지</p>
+            </div>
+            <!-- BM Card 3 -->
+            <div class="bg-white border border-gray-200 rounded-xl p-6 text-center shadow-sm">
+                <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600">
+                    <i data-lucide="users"></i>
+                </div>
+                <h4 class="font-bold text-lg mb-2">교육 및 체험</h4>
+                <p class="text-sm text-gray-600">원데이 클래스 수강료<br>어린이 체험 프로그램<br>작물 판매 중개 수수료</p>
+            </div>
+        </div>
+
+        <div class="bg-gray-900 text-white rounded-xl p-8 mb-12">
+            <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                <i data-lucide="building"></i> 건물주 제공 가치 (Benefits)
+            </h3>
+            <div class="grid grid-cols-2 gap-8">
+                <div>
+                    <h4 class="text-green-400 font-bold mb-2">01. 안정적 수익 확보</h4>
+                    <p class="text-gray-300 text-sm leading-relaxed">
+                        계절과 날씨의 영향을 받지 않아 비수기가 없습니다. 1~3년 장기 임대가 가능하며, 소음이나 냄새가 없어 민원 걱정 없는 깨끗한 임대 모델입니다.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-green-400 font-bold mb-2">02. 건물 가치 상승</h4>
+                    <p class="text-gray-300 text-sm leading-relaxed">
+                        공실이 '친환경 문화 공간'으로 변모합니다. 젊은 층과 가족 단위 방문객 증가로 건물 전체 활력이 살아나며, ESG 친환경 건물로 브랜딩이 가능합니다.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-green-400 font-bold mb-2">03. 유동인구 증가</h4>
+                    <p class="text-gray-300 text-sm leading-relaxed">
+                        체험, 교육을 위한 정기 방문객이 발생하여 건물 내 카페, 식당 등 타 업종과의 시너지 효과를 기대할 수 있습니다.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-green-400 font-bold mb-2">04. 미래지향적 업종</h4>
+                    <p class="text-gray-300 text-sm leading-relaxed">
+                        단순 요식업이 아닌 기후 변화 시대의 필수 산업인 '애그테크(Ag-Tech)'를 도입하여 건물의 이미지를 현대적으로 개선합니다.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="text-xl font-bold text-gray-800 mb-4 border-l-4 border-green-600 pl-4">타겟 분석 (부산대 상권 특화)</h3>
+        <table class="w-full text-sm text-left text-gray-600 border border-gray-200">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                <tr>
+                    <th class="px-6 py-3 border-b">고객층</th>
+                    <th class="px-6 py-3 border-b">특징</th>
+                    <th class="px-6 py-3 border-b">제공 솔루션</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="bg-white border-b hover:bg-gray-50">
+                    <td class="px-6 py-4 font-medium text-gray-900">대학생/자취생</td>
+                    <td class="px-6 py-4">SNS 공유 즐김, 신선 채소 부족</td>
+                    <td class="px-6 py-4">인스타그래머블 힐링 공간, 1인용 미니팜</td>
+                </tr>
+                <tr class="bg-white border-b hover:bg-gray-50">
+                    <td class="px-6 py-4 font-medium text-gray-900">가족 단위</td>
+                    <td class="px-6 py-4">주말 아이 교육/체험 공간 니즈</td>
+                    <td class="px-6 py-4">자연 체험 교육, 패밀리 팜 구독</td>
+                </tr>
+                <tr class="bg-white border-b hover:bg-gray-50">
+                    <td class="px-6 py-4 font-medium text-gray-900">인근 카페/식당</td>
+                    <td class="px-6 py-4">신선한 허브/특수채소 필요</td>
+                    <td class="px-6 py-4">로컬 푸드 직공급 연계 (B2B)</td>
+                </tr>
+                <tr class="bg-white hover:bg-gray-50">
+                    <td class="px-6 py-4 font-medium text-gray-900">직장인</td>
+                    <td class="px-6 py-4">퇴근 후 힐링 취미 선호</td>
+                    <td class="px-6 py-4">자동화 관리 앱, 주말 방문 관리</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- SECTION 4: FINANCIALS & VISION -->
+    <div class="page-container p-16">
+        <div class="border-b-4 border-green-800 pb-4 mb-12">
+            <h2 class="text-3xl font-bold accent-text">4. 재무 계획 및 비전</h2>
+        </div>
+
+        <div class="grid grid-cols-2 gap-12 mb-12">
+            <!-- Investment (Placeholder) -->
+            <div>
+                <h3 class="text-xl font-bold text-gray-800 mb-4">예상 초기 투자 (20대 기준)</h3>
+                <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                    <div class="flex justify-between mb-3 border-b border-gray-200 pb-2">
+                        <span class="text-gray-600">스마트팜 장비</span>
+                        <span class="font-bold text-gray-800">약 00,000,000 원</span>
+                    </div>
+                    <div class="flex justify-between mb-3 border-b border-gray-200 pb-2">
+                        <span class="text-gray-600">인테리어 및 설비</span>
+                        <span class="font-bold text-gray-800">00,000,000 원</span>
+                    </div>
+                    <div class="flex justify-between mb-3 border-b border-gray-200 pb-2">
+                        <span class="text-gray-600">초기 마케팅/운영비</span>
+                        <span class="font-bold text-gray-800">00,000,000 원</span>
+                    </div>
+                    <div class="flex justify-between mt-4 pt-2">
+                        <span class="font-bold text-lg text-green-700">총 투자 예상액</span>
+                        <span class="font-bold text-lg text-green-700">약 000,000,000 원</span>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-4">* 실제 공간 크기와 장비 수량에 따라 변동됩니다.</p>
+                </div>
+            </div>
+
+            <!-- Revenue Structure -->
+            <div>
+                <h3 class="text-xl font-bold text-gray-800 mb-4">월 매출 구조 (예상)</h3>
+                <div class="space-y-4">
+                    <div class="relative pt-1">
+                        <div class="flex mb-2 items-center justify-between">
+                            <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-green-600 bg-green-200">
+                                구독료 (50~60%)
+                            </span>
+                        </div>
+                        <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-green-100">
+                            <div style="width:60%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-600"></div>
+                        </div>
+                    </div>
+                    <div class="relative pt-1">
+                        <div class="flex mb-2 items-center justify-between">
+                            <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-teal-600 bg-teal-200">
+                                클래스/교육 (15%)
+                            </span>
+                        </div>
+                        <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-teal-100">
+                            <div style="width:15%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-teal-500"></div>
+                        </div>
+                    </div>
+                    <div class="relative pt-1">
+                        <div class="flex mb-2 items-center justify-between">
+                            <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-blue-600 bg-blue-200">
+                                물품 판매/기타 (25%)
+                            </span>
+                        </div>
+                        <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-blue-100">
+                            <div style="width:25%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-16">
+            <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <i data-lucide="trending-up" class="text-green-600"></i> 장기 성장 로드맵
+            </h3>
+            <div class="flex items-center justify-between text-center relative">
+                <!-- Line -->
+                <div class="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 transform -translate-y-1/2"></div>
+                
+                <div class="bg-white p-4">
+                    <div class="w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center mx-auto mb-2 font-bold">1</div>
+                    <p class="font-bold text-sm">부산대 1호점<br>안정화</p>
+                </div>
+                <div class="bg-white p-4">
+                    <div class="w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto mb-2 font-bold">2</div>
+                    <p class="font-bold text-sm">부산 지역<br>다점포 확대</p>
+                </div>
+                <div class="bg-white p-4">
+                    <div class="w-10 h-10 bg-green-400 text-white rounded-full flex items-center justify-center mx-auto mb-2 font-bold">3</div>
+                    <p class="font-bold text-sm">프랜차이즈<br>가맹 모집</p>
+                </div>
+                <div class="bg-white p-4">
+                    <div class="w-10 h-10 bg-green-300 text-white rounded-full flex items-center justify-center mx-auto mb-2 font-bold">4</div>
+                    <p class="font-bold text-sm">가정용 장비<br>판매 확장</p>
+                </div>
+                <div class="bg-white p-4">
+                    <div class="w-10 h-10 bg-gray-400 text-white rounded-full flex items-center justify-center mx-auto mb-2 font-bold">5</div>
+                    <p class="font-bold text-sm">스마트팜<br>종합 플랫폼</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Closing Statement -->
+        <div class="bg-green-50 border-2 border-green-600 rounded-xl p-8 text-center">
+            <p class="text-lg font-medium text-green-900 mb-2">
+                "기후 변화 시대, 안정적인 실내재배 스마트팜은 단순한 취미 공간을 넘어 미래형 도시 문화 공간입니다."
+            </p>
+            <p class="text-gray-700">
+                건물의 죽어있는 공간을 <strong>초록빛 힐링 스튜디오</strong>로 바꾸어,<br>
+                건물의 가치 상승과 장기 임대 수익을 함께 실현할 것을 제안합니다.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Set current date safely
+        const today = new Date();
+        const formattedDate = `${today.getFullYear()}. ${String(today.getMonth() + 1).padStart(2, '0')}. ${String(today.getDate()).padStart(2, '0')}`;
+        const dateElement = document.getElementById('current-date');
+        if(dateElement) dateElement.textContent = formattedDate;
+
+        // Initialize icons safely
+        function initIcons() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        if (typeof lucide !== 'undefined') {
+            initIcons();
+        } else {
+            // Wait for window load if script hasn't loaded yet
+            window.addEventListener('load', initIcons);
+        }
+    </script>
+</body>
+</html>
