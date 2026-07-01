@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AFL 핵심 히스토리 타임라인</title>
+  <style>
+    @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
+
+    :root {
+      color-scheme: light;
+      --ink: #17212b;
+      --muted: #657383;
+      --bg: #eef6f8;
+      --panel: #ffffff;
+      --line: #dbe8ee;
+      --blue: #0878b8;
+      --cyan: #19a7c7;
+      --teal: #31b7aa;
+      --green: #81c84b;
+      --shadow: 0 24px 70px rgba(20, 72, 100, 0.16);
+      --soft-shadow: 0 12px 30px rgba(21, 90, 120, 0.13);
+    }
+
+    * { box-sizing: border-box; }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes lineIn {
+      from {
+        opacity: 0;
+        transform: scaleX(0.96);
+      }
+      to {
+        opacity: 1;
+        transform: scaleX(1);
+      }
+    }
+
+    @keyframes pulseBadge {
+      0%, 100% { box-shadow: var(--soft-shadow); }
+      50% { box-shadow: 0 14px 34px rgba(21, 90, 120, 0.22); }
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+      color: var(--ink);
+      background:
+        linear-gradient(135deg, rgba(8, 120, 184, 0.12), transparent 34%),
+        linear-gradient(225deg, rgba(129, 200, 75, 0.14), transparent 32%),
+        var(--bg);
+      line-height: 1.35;
+    }
+
+    main {
+      width: min(100vw, 1600px);
+      aspect-ratio: 16 / 5;
+      margin: 0;
+      padding: 0;
+    }
+
+    .timeline {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow-x: auto;
+      padding: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.88);
+      border-radius: 22px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(247, 252, 253, 0.88)),
+        var(--panel);
+      box-shadow: var(--shadow);
+      animation: fadeUp 700ms ease both;
+    }
+
+    .timeline-board {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      margin: 0 auto;
+      border-radius: 18px;
+      background:
+        linear-gradient(90deg, rgba(8, 120, 184, 0.05) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(8, 120, 184, 0.05) 1px, transparent 1px);
+      background-size: 76px 76px;
+    }
+
+    .timeline-board::before {
+      content: "";
+      position: absolute;
+      left: 24px;
+      right: 24px;
+      top: 49%;
+      height: 68px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(8, 120, 184, 0.16), rgba(129, 200, 75, 0.16));
+      filter: blur(22px);
+      opacity: 0.78;
+    }
+
+    .segments {
+      position: absolute;
+      left: 24px;
+      right: 24px;
+      top: 45.8%;
+      display: grid;
+      grid-template-columns: repeat(var(--count), minmax(0, 1fr));
+      align-items: center;
+      z-index: 2;
+      transform-origin: center;
+      animation: lineIn 780ms ease 120ms both;
+    }
+
+    .segment {
+      display: grid;
+      place-items: center;
+      height: 46px;
+      margin-left: -1px;
+      color: #ffffff;
+      background: linear-gradient(90deg, var(--blue), var(--cyan));
+      border: 1px solid rgba(255, 255, 255, 0.36);
+      border-radius: 16px;
+      box-shadow: 0 14px 28px rgba(8, 120, 184, 0.19);
+      transition: transform 180ms ease, filter 180ms ease;
+    }
+
+    .segment:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.04);
+    }
+
+    .segment span {
+      display: block;
+      padding: 0 6px;
+      font-size: 15px;
+      font-weight: 900;
+      line-height: 1;
+      white-space: nowrap;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+    }
+
+    .segment-1 { border-radius: 26px 16px 16px 26px; }
+    .segment-12 { border-radius: 16px 26px 26px 16px; }
+    .segment-1, .segment-2, .segment-3 { background: linear-gradient(90deg, #0878b8, #1099c2); }
+    .segment-4, .segment-5, .segment-6 { background: linear-gradient(90deg, #14a6c3, #2fb5b1); }
+    .segment-7, .segment-8, .segment-9 { background: linear-gradient(90deg, #2fb5b1, #62bf77); }
+    .segment-10, .segment-11, .segment-12 { background: linear-gradient(90deg, #62bf77, #91cb45); }
+
+    .direction-arrow {
+      position: absolute;
+      left: 40px;
+      right: 36px;
+      top: 62.5%;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(8, 120, 184, 0.18), rgba(129, 200, 75, 0.72));
+      z-index: 1;
+    }
+
+    .direction-arrow::after {
+      content: "";
+      position: absolute;
+      right: -6px;
+      top: 50%;
+      width: 0;
+      height: 0;
+      border-top: 7px solid transparent;
+      border-bottom: 7px solid transparent;
+      border-left: 12px solid #82c84d;
+      transform: translateY(-50%);
+    }
+
+    .direction-arrow span {
+      position: absolute;
+      right: 18px;
+      top: 9px;
+      color: #648192;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
+    .flow-label {
+      position: absolute;
+      top: 44.5%;
+      z-index: 5;
+      display: grid;
+      place-items: center;
+      height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.88);
+      color: #315161;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      box-shadow: 0 8px 18px rgba(30, 78, 102, 0.12);
+    }
+
+    .flow-label.start { left: 8px; }
+    .flow-label.end { right: 8px; }
+
+    .milestones {
+      position: absolute;
+      inset: 0 24px;
+      display: grid;
+      grid-template-columns: repeat(var(--count), minmax(0, 1fr));
+      z-index: 3;
+    }
+
+    .milestone {
+      --accent: #0878b8;
+      position: relative;
+      grid-column: var(--i);
+      display: grid;
+      justify-items: center;
+      min-width: 0;
+      text-align: center;
+      animation: fadeUp 640ms ease both;
+      animation-delay: calc(var(--i) * 55ms);
+    }
+
+    .milestone:nth-child(1),
+    .milestone:nth-child(2),
+    .milestone:nth-child(3) { --accent: #0878b8; }
+    .milestone:nth-child(4),
+    .milestone:nth-child(5),
+    .milestone:nth-child(6) { --accent: #23a9bd; }
+    .milestone:nth-child(7),
+    .milestone:nth-child(8),
+    .milestone:nth-child(9) { --accent: #44b98b; }
+    .milestone:nth-child(10),
+    .milestone:nth-child(11),
+    .milestone:nth-child(12) { --accent: #82c84d; }
+
+    .connector {
+      position: absolute;
+      left: 50%;
+      width: 2px;
+      background: var(--accent);
+      transform: translateX(-50%);
+      z-index: 1;
+      opacity: 0.72;
+    }
+
+    .top .connector {
+      top: 39%;
+      height: 7%;
+    }
+
+    .bottom .connector {
+      top: 55%;
+      height: 11%;
+    }
+
+    .step-badge {
+      position: absolute;
+      left: 50%;
+      display: grid;
+      place-items: center;
+      width: 72px;
+      height: 72px;
+      border: 4px solid var(--accent);
+      border-radius: 50%;
+      background: #ffffff;
+      color: var(--accent);
+      font-size: 22px;
+      font-weight: 950;
+      letter-spacing: 0;
+      box-shadow: var(--soft-shadow);
+      transform: translateX(-50%);
+      z-index: 4;
+      transition: transform 180ms ease, box-shadow 180ms ease;
+      animation: pulseBadge 3.8s ease-in-out infinite;
+      animation-delay: calc(var(--i) * 120ms);
+    }
+
+    .step-badge::before {
+      content: "";
+      position: absolute;
+      inset: 7px;
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--accent), transparent 91%);
+      z-index: -1;
+    }
+
+    .top .step-badge { top: 26%; }
+    .bottom .step-badge { top: 66%; }
+
+    .copy {
+      position: absolute;
+      left: 50%;
+      width: min(174px, calc(100% + 62px));
+      min-height: 94px;
+      padding: 10px 12px;
+      border: 1px solid rgba(218, 231, 237, 0.9);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: 0 10px 24px rgba(38, 84, 105, 0.09);
+      transform: translateX(-50%);
+      z-index: 5;
+      transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+    }
+
+    .milestone:hover .copy {
+      border-color: color-mix(in srgb, var(--accent), #ffffff 55%);
+      box-shadow: 0 16px 34px rgba(38, 84, 105, 0.16);
+      transform: translateX(-50%) translateY(-4px);
+    }
+
+    .milestone:hover .step-badge {
+      transform: translateX(-50%) translateY(-3px) scale(1.03);
+      box-shadow: 0 18px 38px rgba(21, 90, 120, 0.24);
+    }
+
+    .top .copy { top: 3%; }
+    .bottom .copy { top: 80%; }
+
+    h2 {
+      margin: 0 0 4px;
+      color: #18303f;
+      font-size: 14px;
+      line-height: 1.12;
+      letter-spacing: 0;
+      font-weight: 900;
+      word-break: keep-all;
+    }
+
+    p {
+      margin: 0;
+      color: #637181;
+      font-size: 10.5px;
+      font-weight: 650;
+      line-height: 1.25;
+      word-break: keep-all;
+    }
+
+    @media (max-width: 900px) {
+      body { display: block; }
+      main { width: 100%; aspect-ratio: auto; padding: 12px; }
+      .timeline { overflow-x: visible; padding: 12px; }
+      .timeline-board {
+        min-width: 0;
+        height: auto;
+        background: transparent;
+      }
+      .timeline-board::before { display: none; }
+      .segments, .direction-arrow, .flow-label { display: none; }
+      .milestones {
+        position: relative;
+        inset: auto;
+        height: auto;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .milestone {
+        grid-column: auto;
+        grid-template-columns: 54px 1fr;
+        gap: 14px;
+        align-items: center;
+        justify-items: start;
+        min-height: 88px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--panel);
+        box-shadow: 0 8px 18px rgba(20, 72, 100, 0.08);
+      }
+      .connector { display: none; }
+      .step-badge {
+        position: static;
+        width: 50px;
+        height: 50px;
+        border-width: 4px;
+        font-size: 17px;
+        transform: none;
+      }
+      .milestone:hover .copy,
+      .milestone:hover .step-badge { transform: none; }
+      .copy {
+        position: static;
+        width: auto;
+        transform: none;
+        text-align: left;
+      }
+      .top .copy, .bottom .copy, .top .step-badge, .bottom .step-badge { top: auto; }
+      h2 { font-size: 18px; }
+      p { font-size: 13px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 1ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="timeline" aria-label="AFL 핵심 연혁">
+
+      <div class="timeline-board" style="--count: 12;">
+        <div class="flow-label start" aria-hidden="true">START</div>
+        <div class="flow-label end" aria-hidden="true">NOW</div>
+        <div class="segments" aria-label="AFL 핵심 연혁 연도">
+
+          <div class="segment segment-1">
+            <span>2017년</span>
+          </div>
+
+          <div class="segment segment-2">
+            <span>2017년</span>
+          </div>
+
+          <div class="segment segment-3">
+            <span>2019년</span>
+          </div>
+
+          <div class="segment segment-4">
+            <span>2023-02</span>
+          </div>
+
+          <div class="segment segment-5">
+            <span>2024-03</span>
+          </div>
+
+          <div class="segment segment-6">
+            <span>2024-09</span>
+          </div>
+
+          <div class="segment segment-7">
+            <span>2025-01</span>
+          </div>
+
+          <div class="segment segment-8">
+            <span>2025-04</span>
+          </div>
+
+          <div class="segment segment-9">
+            <span>2025-07</span>
+          </div>
+
+          <div class="segment segment-10">
+            <span>2025-08</span>
+          </div>
+
+          <div class="segment segment-11">
+            <span>2026-05</span>
+          </div>
+
+          <div class="segment segment-12">
+            <span>2026-06</span>
+          </div>
+        </div>
+        <div class="direction-arrow" aria-hidden="true">
+          <span>TIME FLOWS LEFT TO RIGHT</span>
+        </div>
+        <div class="milestones">
+
+          <article class="milestone bottom" style="--i: 1;">
+            <div class="connector" aria-hidden="true"></div>
+            <div class="step-badge" aria-hidden="true">01</div>
+            <div class="copy">
+              <h2>포크리프트 AGV 연구 필요성</h2>
+              <p>창고 연계 적재 기능 기대, 물류팀 협업</p>
+            </div>
+          </article>
+          <article class="milestone top" style="--i: 2;">
+            <div class="connector" aria-hidden="true"></div>
+            <div class="step-badge" aria-hidden="true">02</div>
+            <div class="copy">
+              <h2>포크리프트 AGV 실증 개발</h2>
+              <p>예일 상용 스테커 구입, 2D SLAM 적용</p>
+            </div>
+          </article>
+          <article class="milestone bottom" style="--i: 3;">
+            <div class="connector" aria-hidden="true"></div>
+            <div class="step-badge" aria-hidden="true">03</div>
+            <div class="copy">
+              <h2>첫 매출 프로젝트 실행</h2>
+              <p>일진글로벌 제천공장에 AGV 2대 공급</p>
+            </div>
+          </article>
+          <article class="milestone top" style="--i: 4;">
+            <div class="connector" aria-hidden="true"></div>
+            <div class="step-badge" aria-hidden="true">04</div>
+            <div class="copy">
+              <h2>포크리프트 AGV 워크샵</h2>
+              <p>TFT 구성, 기술·사업팀 등 6팀 참여</p>
+            </div>
+          </article>
+          <article class="milestone bottom" style="--i: 5;">
+            <div class="connector" aria-hidden="true"></div>
+            <div class="step-badge" aria-hidden="true">05</div>
+            <div class="copy">
+              <h2>AFL 3D 핵심 요소 정의</h2>
+              <p>위치인식 강인도, HW 의존↓, 시각화 SW</p>
+            </div>
+          </article>
+          <article class="milestone top" style="--i: 6;">
+            <div class="connector" aria-hidden="true"></div>
+            <div class="step-badge" aria-hidden="true">06</div>
+            <div class="copy">
+              <h2>3D SLAM 이식 및 일정</h2>
+              <p>원스탭 공장 시운전, 멀티·싱글·모니터링 설계</p>
+            </div>
+          </article>
+          <article class="milestone bottom" style="--i: 7;">
+            <div class="connector" aria-hidden="true"></div>
+            <div class="step-badge" aria-hidden="true">07</div>
+            <div class="copy">
+              <h2>AFL 차량 통합 테스트</h2>
+              <p>SW 통신 프로토콜 매칭·수정 지속</p>
+            </div>
+          </article>
+          <article class="milestone top" style="--i: 8;">
+            <div class="connector" aria-hidden="true"></div>
+            <div class="step-badge" aria-hidden="true">08</div>
+            <div class="copy">
+              <h2>AFL 로드맵 수립</h2>
+              <p>V1.5 3D SLAM, V1.8 열악 환경, V2.0 상용</p>
+            </div>
+          </article>
+          <article class="milestone bottom" style="--i: 9;">
+            <div class="connector" aria-hidden="true"></div>
+            <div class="step-badge" aria-hidden="true">09</div>
+            <div class="copy">
+              <h2>AFL V2.0 추진 계획</h2>
+              <p>중소형 생산 현장 타깃, 지능·디전센 협업</p>
+            </div>
+          </article>
+          <article class="milestone top" style="--i: 10;">
+            <div class="connector" aria-hidden="true"></div>
+            <div class="step-badge" aria-hidden="true">10</div>
+            <div class="copy">
+              <h2>AFL V2.0 프로젝트 시작</h2>
+              <p>미래성장팀 협업, 마케팅·BM 구체화 지원</p>
+            </div>
+          </article>
+          <article class="milestone bottom" style="--i: 11;">
+            <div class="connector" aria-hidden="true"></div>
+            <div class="step-badge" aria-hidden="true">11</div>
+            <div class="copy">
+              <h2>AFL V2.0 마스터플랜</h2>
+              <p>기획·설계·HW·SW·PoC·평가 전반 계획 수립</p>
+            </div>
+          </article>
+          <article class="milestone top" style="--i: 12;">
+            <div class="connector" aria-hidden="true"></div>
+            <div class="step-badge" aria-hidden="true">12</div>
+            <div class="copy">
+              <h2>AFL V2.0 자체 모델 조립</h2>
+              <p>커버류 별도 설계·제작 진행</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
