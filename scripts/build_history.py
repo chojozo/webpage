@@ -933,12 +933,345 @@ def render_html(source: Path, items: list[HistoryItem], milestones: list[Milesto
 """
 
 
+BRANCH_ICONS = [
+    """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 8h14M6 16h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/></svg>""",
+    """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17h16M7 17V9h4v8M13 17V5h4v12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
+    """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19h12M8 19V7h8v12M10 10h4M10 14h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
+    """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17h10M8 17l1-9h6l1 9M9 8l3-4 3 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
+    """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15h16M7 15v4M17 15v4M9 15l3-8 3 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
+    """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5v14M7 7l10 10M17 7 7 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>""",
+]
+
+
+def render_branch_rows(milestones: list[Milestone]) -> str:
+    colors = ["#6f7d94", "#77c9c9", "#f3bf2e", "#ee6d59", "#86c9a3", "#6f9fd8"]
+    segments = []
+    nodes = []
+    for index, item in enumerate(milestones):
+        side = "top" if index % 2 else "bottom"
+        color = colors[index % len(colors)]
+        segments.append(
+            f"""
+          <div class="branch-segment" style="--accent: {color};"></div>"""
+        )
+        nodes.append(
+            f"""
+          <article class="branch-item {side}" style="--i: {index + 1}; --accent: {color};">
+            <div class="branch-copy">
+              <h2>{html.escape(compact_label(item.title, 24))}</h2>
+              <p>{html.escape(compact_label(item.summary, 36))}</p>
+            </div>
+            <div class="branch-date">{html.escape(item.raw_date)}</div>
+            <div class="branch-stem" aria-hidden="true"></div>
+            <div class="branch-icon" aria-hidden="true">{BRANCH_ICONS[index % len(BRANCH_ICONS)]}</div>
+            <div class="branch-dot" aria-hidden="true"></div>
+          </article>"""
+        )
+
+    return f"""
+      <div class="branch-board" style="--count: {len(milestones)};">
+        <div class="branch-axis" aria-label="AFL 핵심 연혁 연도">
+{''.join(segments)}
+        </div>
+        <div class="branch-items">
+{''.join(nodes)}
+        </div>
+      </div>"""
+
+
+def render_branch_html(source: Path, items: list[HistoryItem], milestones: list[Milestone], used_llm: bool) -> str:
+    branch_rows = render_branch_rows(milestones)
+
+    return f"""<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AFL 핵심 히스토리 타임라인</title>
+  <style>
+    @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
+
+    :root {{
+      color-scheme: light;
+      --ink: #334052;
+      --muted: #8d968f;
+      --paper: #f5ecdf;
+      --line: rgba(93, 111, 126, 0.16);
+      --shadow: 0 22px 60px rgba(82, 67, 48, 0.13);
+    }}
+
+    * {{ box-sizing: border-box; }}
+
+    @keyframes rise {{
+      from {{ opacity: 0; transform: translateY(16px); }}
+      to {{ opacity: 1; transform: translateY(0); }}
+    }}
+
+    body {{
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 24%, rgba(255,255,255,0.54), transparent 24%),
+        linear-gradient(135deg, #fbf3e6, #efe4d4);
+      line-height: 1.32;
+    }}
+
+    main {{
+      width: min(100vw, 1280px);
+      aspect-ratio: 16 / 4;
+      margin: 0;
+      padding: 0;
+    }}
+
+    .timeline {{
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0)),
+        var(--paper);
+      box-shadow: var(--shadow);
+    }}
+
+    .branch-board {{
+      position: relative;
+      width: 100%;
+      height: 100%;
+      padding: 28px 32px 24px;
+      background:
+        linear-gradient(90deg, var(--line) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(93,111,126,0.08) 1px, transparent 1px);
+      background-size: 72px 72px;
+    }}
+
+    .branch-axis {{
+      position: absolute;
+      left: 36px;
+      right: 36px;
+      top: 50%;
+      display: grid;
+      grid-template-columns: repeat(var(--count), minmax(0, 1fr));
+      height: 24px;
+      transform: translateY(-50%);
+      z-index: 2;
+    }}
+
+    .branch-segment {{
+      position: relative;
+      display: grid;
+      place-items: center;
+      margin-left: -1px;
+      color: #fff;
+      background: var(--accent);
+      clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 12px 50%);
+      box-shadow: 0 8px 14px rgba(80, 68, 48, 0.09);
+    }}
+
+    .branch-segment:first-child {{
+      clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%);
+      border-radius: 4px 0 0 4px;
+    }}
+
+    .branch-segment:last-child {{
+      border-radius: 0 4px 4px 0;
+    }}
+
+    .branch-date {{
+      position: absolute;
+      left: 50%;
+      display: block;
+      padding: 0 4px;
+      color: var(--accent);
+      font-size: 17px;
+      line-height: 1;
+      font-weight: 950;
+      letter-spacing: 0;
+      text-shadow: 0 2px 0 rgba(255,255,255,0.5);
+      white-space: nowrap;
+      transform: translateX(-50%);
+      z-index: 4;
+    }}
+
+    .bottom .branch-date {{
+      top: calc(50% - 47px);
+    }}
+
+    .top .branch-date {{
+      top: calc(50% + 25px);
+    }}
+
+    .branch-items {{
+      position: absolute;
+      inset: 0 36px;
+      display: grid;
+      grid-template-columns: repeat(var(--count), minmax(0, 1fr));
+      z-index: 3;
+    }}
+
+    .branch-item {{
+      position: relative;
+      grid-column: var(--i);
+      display: grid;
+      justify-items: center;
+      min-width: 0;
+      color: var(--accent);
+      text-align: center;
+      animation: rise 520ms ease both;
+      animation-delay: calc(var(--i) * 45ms);
+    }}
+
+    .branch-copy {{
+      position: absolute;
+      left: 50%;
+      width: min(164px, calc(100% + 64px));
+      transform: translateX(-50%);
+      color: #51605d;
+    }}
+
+    .top .branch-copy {{ top: 11px; }}
+    .bottom .branch-copy {{ bottom: 12px; }}
+
+    .branch-copy h2 {{
+      margin: 0 0 6px;
+      color: var(--accent);
+      font-size: 14px;
+      line-height: 1.14;
+      font-weight: 950;
+      letter-spacing: 0;
+      word-break: keep-all;
+    }}
+
+    .branch-copy p {{
+      margin: 0;
+      color: rgba(54, 65, 66, 0.68);
+      font-size: 10.2px;
+      line-height: 1.3;
+      font-weight: 760;
+      word-break: keep-all;
+    }}
+
+    .branch-icon {{
+      position: absolute;
+      left: 50%;
+      display: grid;
+      place-items: center;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--accent), white 16%);
+      color: #fff;
+      box-shadow:
+        inset 0 0 0 7px rgba(255,255,255,0.28),
+        0 12px 22px rgba(80, 68, 48, 0.14);
+      transform: translateX(-50%);
+    }}
+
+    .branch-icon svg {{
+      width: 26px;
+      height: 26px;
+      display: block;
+    }}
+
+    .top .branch-icon {{ top: 78px; }}
+    .bottom .branch-icon {{ bottom: 78px; }}
+
+    .branch-stem {{
+      position: absolute;
+      left: 50%;
+      width: 3px;
+      background: color-mix(in srgb, var(--accent), white 24%);
+      transform: translateX(-50%);
+      opacity: 0.72;
+    }}
+
+    .top .branch-stem {{ top: 130px; height: calc(50% - 130px); }}
+    .bottom .branch-stem {{ bottom: 130px; height: calc(50% - 130px); }}
+
+    .branch-dot {{
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 8px;
+      height: 8px;
+      border: 2px solid rgba(255,255,255,0.8);
+      border-radius: 50%;
+      background: #fff;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent), white 20%);
+    }}
+
+    @media (max-width: 900px) {{
+      body {{ display: block; }}
+      main {{ width: 100%; aspect-ratio: auto; }}
+      .timeline {{ overflow: visible; }}
+      .branch-board {{
+        height: auto;
+        padding: 14px;
+        background: var(--paper);
+      }}
+      .branch-axis {{ display: none; }}
+      .branch-items {{
+        position: relative;
+        inset: auto;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }}
+      .branch-item {{
+        grid-column: auto;
+        display: grid;
+        grid-template-columns: 56px 1fr;
+        gap: 12px;
+        align-items: center;
+        min-height: 82px;
+        padding: 12px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.48);
+        text-align: left;
+      }}
+      .branch-copy,
+      .top .branch-copy,
+      .bottom .branch-copy {{
+        position: static;
+        width: auto;
+        transform: none;
+      }}
+      .branch-icon,
+      .top .branch-icon,
+      .bottom .branch-icon {{
+        position: static;
+        transform: none;
+      }}
+      .branch-stem,
+      .branch-dot {{ display: none; }}
+      .branch-copy h2 {{ font-size: 16px; }}
+      .branch-copy p {{ font-size: 12px; }}
+    }}
+  </style>
+</head>
+<body>
+  <main>
+    <section class="timeline" aria-label="AFL 핵심 연혁">
+{branch_rows}
+    </section>
+  </main>
+</body>
+</html>
+"""
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Build the AFL history diagram HTML.")
     parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE)
     parser.add_argument("--source-type", choices=("auto", "file", "notion"), default="auto")
     parser.add_argument("--notion-database-id", default=None)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--style", choices=("classic", "branch"), default="classic")
     parser.add_argument("--limit", type=int, default=12)
     parser.add_argument("--no-llm", action="store_true", help="Do not call the configured internal LLM.")
     args = parser.parse_args()
@@ -953,7 +1286,8 @@ def main() -> None:
     llm_milestones = None if args.no_llm else ask_llm_for_milestones(selected, args.limit)
     milestones = llm_milestones or fallback_milestones(selected)
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(render_html(args.source, items, milestones, used_llm=bool(llm_milestones)), encoding="utf-8")
+    renderer = render_branch_html if args.style == "branch" else render_html
+    args.output.write_text(renderer(args.source, items, milestones, used_llm=bool(llm_milestones)), encoding="utf-8")
     source_name = "Notion database" if use_notion else str(args.source)
     print(f"Built {args.output} from {source_name}, {len(items)} rows, selected {len(milestones)} milestones.")
 

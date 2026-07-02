@@ -11,6 +11,10 @@ on:
         description: "Notion database id or URL. Empty uses NOTION_DATABASE_ID secret or the AFL default."
         required: false
         default: ""
+      style:
+        description: "Diagram style: classic or branch"
+        required: true
+        default: "classic"
 
 permissions:
   contents: write
@@ -33,6 +37,7 @@ jobs:
             --source-type notion \
             --notion-database-id "${{ inputs.notion_database_id }}" \
             --output "${{ inputs.slug }}/index.html" \
+            --style "${{ inputs.style }}" \
             --limit 12
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
