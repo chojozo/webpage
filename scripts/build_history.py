@@ -16,7 +16,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SOURCE = ROOT / "afl history"
-DEFAULT_OUTPUT = ROOT / "docs" / "afl" / "index.html"
+DEFAULT_OUTPUT = ROOT / "afl" / "index.html"
 DEFAULT_NOTION_DATABASE_ID = "382b89a3c13380a68912fcb8b4b74e3a"
 NOTION_API_VERSION = "2022-06-28"
 

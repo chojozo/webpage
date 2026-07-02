@@ -32,7 +32,7 @@ jobs:
           python scripts/build_history.py \
             --source-type notion \
             --notion-database-id "${{ inputs.notion_database_id }}" \
-            --output "docs/${{ inputs.slug }}/index.html" \
+            --output "${{ inputs.slug }}/index.html" \
             --limit 12
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
@@ -48,4 +48,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Update ${{ inputs.slug }} history diagram"
-          file_pattern: docs/**/index.html
+          file_pattern: "**/index.html"
