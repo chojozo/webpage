@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toyota Automated Logistics (TAL) 심층 분석 보고서</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --ink-light: #444;
+    --ink-muted: #888;
+    --red: #C8102E;
+    --red-light: #f5e6e9;
+    --gold: #B8860B;
+    --bg: #F9F7F4;
+    --surface: #ffffff;
+    --border: #e0dbd5;
+    --rule: #d0cac3;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.8;
+  }
+
+  /* HEADER */
+  .masthead {
+    background: var(--ink);
+    color: white;
+    padding: 60px 0 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .masthead::before {
+    content: 'TAL';
+    position: absolute;
+    right: -20px;
+    top: -30px;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 220px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.04);
+    letter-spacing: -10px;
+    pointer-events: none;
+  }
+  .masthead-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 48px;
+    position: relative;
+    z-index: 1;
+  }
+  .report-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .report-label::before {
+    content: '';
+    width: 32px;
+    height: 1px;
+    background: var(--red);
+  }
+  .masthead h1 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: white;
+    margin-bottom: 8px;
+  }
+  .masthead h1 span {
+    color: var(--red);
+  }
+  .masthead-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    font-weight: 300;
+    margin-top: 16px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* EXEC SUMMARY BAND */
+  .exec-band {
+    background: var(--red);
+    color: white;
+    padding: 32px 0;
+  }
+  .exec-band-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 48px;
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+  .exec-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    opacity: 0.8;
+    padding-top: 4px;
+    border-top: 1px solid rgba(255,255,255,0.4);
+  }
+  .exec-text {
+    font-size: 14px;
+    line-height: 1.9;
+    font-weight: 300;
+  }
+  .exec-text strong { font-weight: 700; }
+
+  /* STATS ROW */
+  .stats-row {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 0;
+  }
+  .stats-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 48px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+  }
+  .stat-item {
+    padding: 0 24px;
+    border-right: 1px solid var(--border);
+  }
+  .stat-item:first-child { padding-left: 0; }
+  .stat-item:last-child { border-right: none; }
+  .stat-num {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--red);
+    line-height: 1;
+  }
+  .stat-unit {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-muted);
+  }
+  .stat-desc {
+    font-size: 11px;
+    color: var(--ink-light);
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  /* MAIN LAYOUT */
+  .main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 48px 80px;
+  }
+
+  /* SECTION */
+  .section {
+    padding: 48px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .section:last-child { border-bottom: none; }
+
+  .section-header {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 20px;
+    align-items: start;
+    margin-bottom: 28px;
+  }
+  .section-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--red);
+    letter-spacing: 1px;
+    padding-top: 6px;
+    text-align: right;
+  }
+  .section-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+  .section-body {
+    padding-left: 60px;
+  }
+
+  p { margin-bottom: 16px; color: var(--ink-light); }
+  p:last-child { margin-bottom: 0; }
+  strong { color: var(--ink); font-weight: 700; }
+
+  /* TIMELINE */
+  .timeline {
+    margin: 24px 0;
+    position: relative;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 88px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+  .tl-item {
+    display: grid;
+    grid-template-columns: 88px 1fr;
+    gap: 24px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .tl-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-muted);
+    text-align: right;
+    padding-top: 2px;
+  }
+  .tl-content {
+    padding-left: 24px;
+    position: relative;
+  }
+  .tl-content::before {
+    content: '';
+    position: absolute;
+    left: -5px;
+    top: 6px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--red);
+    border: 2px solid var(--bg);
+  }
+  .tl-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 2px;
+  }
+  .tl-desc {
+    font-size: 12px;
+    color: var(--ink-muted);
+    line-height: 1.5;
+  }
+  .tl-item.highlight .tl-content::before {
+    background: var(--gold);
+    width: 12px;
+    height: 12px;
+    left: -6px;
+    top: 4px;
+  }
+  .tl-item.highlight .tl-title { color: var(--gold); }
+
+  /* COMPANY CARDS */
+  .company-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .company-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .company-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--red);
+  }
+  .company-card.blue::before { background: #1565C0; }
+  .company-card.green::before { background: #2E7D32; }
+  .company-name {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .company-role {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .company-tag {
+    display: inline-block;
+    background: var(--red-light);
+    color: var(--red);
+    font-size: 10px;
+    padding: 2px 8px;
+    margin: 2px 2px 2px 0;
+    font-family: 'DM Mono', monospace;
+  }
+  .company-card.blue .company-tag { background: #E3F2FD; color: #1565C0; }
+  .company-card.green .company-tag { background: #E8F5E9; color: #2E7D32; }
+  .company-desc {
+    font-size: 11.5px;
+    color: var(--ink-light);
+    margin-top: 12px;
+    line-height: 1.6;
+  }
+
+  /* MARGIN TABLE */
+  .margin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    font-size: 13px;
+  }
+  .margin-table th {
+    background: var(--ink);
+    color: white;
+    padding: 10px 16px;
+    text-align: left;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
+  .margin-table td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--ink-light);
+  }
+  .margin-table tr:last-child td { border-bottom: none; }
+  .margin-table tr:nth-child(even) td { background: rgba(0,0,0,0.02); }
+  .margin-table .num { font-family: 'DM Mono', monospace; color: var(--ink); }
+  .margin-table .good { color: #2E7D32; font-weight: 700; }
+  .margin-table .mid { color: var(--gold); font-weight: 700; }
+  .margin-table .low { color: var(--red); font-weight: 700; }
+
+  /* SCENARIO TABLE */
+  .scenario-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    font-size: 12.5px;
+  }
+  .scenario-table th {
+    padding: 10px 14px;
+    text-align: center;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    background: #f0ece8;
+    color: var(--ink-muted);
+    border-bottom: 2px solid var(--border);
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+  }
+  .scenario-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+    color: var(--ink-light);
+  }
+  .scenario-table .label {
+    font-weight: 700;
+    color: var(--ink);
+    text-align: left;
+    font-family: 'Noto Serif KR', serif;
+  }
+  .scenario-table .num { font-family: 'DM Mono', monospace; color: var(--ink); font-size: 13px; }
+  .row-bear td { background: #fff9f9; }
+  .row-base td { background: white; }
+  .row-bull td { background: #f9fff9; }
+  .row-bear .label { color: var(--red); }
+  .row-base .label { color: var(--gold); }
+  .row-bull .label { color: #2E7D32; }
+
+  /* RISK ITEMS */
+  .risk-list { margin: 20px 0; }
+  .risk-item {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .risk-item:last-child { border-bottom: none; }
+  .risk-type {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: white;
+    background: var(--red);
+    padding: 4px 8px;
+    align-self: start;
+    text-align: center;
+    line-height: 1.6;
+  }
+  .risk-type.mid { background: var(--gold); }
+  .risk-type.low { background: var(--ink-muted); }
+  .risk-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .risk-body { font-size: 12.5px; color: var(--ink-light); line-height: 1.7; }
+
+  /* RECOMMENDATIONS */
+  .rec-list { margin: 20px 0; counter-reset: rec; }
+  .rec-item {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+    align-items: start;
+  }
+  .rec-num {
+    width: 36px;
+    height: 36px;
+    background: var(--ink);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .rec-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 4px;
+    padding-top: 8px;
+  }
+  .rec-body { font-size: 12.5px; color: var(--ink-light); line-height: 1.7; }
+
+  /* ROADMAP */
+  .roadmap {
+    margin: 24px 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .roadmap-col {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 16px;
+  }
+  .roadmap-year {
+    font-family: 'DM Mono', monospace;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--red);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+  }
+  .roadmap-item {
+    font-size: 11.5px;
+    color: var(--ink-light);
+    padding: 5px 0;
+    border-bottom: 1px dashed var(--border);
+    line-height: 1.5;
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-item::before {
+    content: '→ ';
+    color: var(--red);
+    font-weight: 700;
+  }
+
+  /* MARKET BARS */
+  .market-bars { margin: 24px 0; }
+  .bar-item { margin-bottom: 16px; }
+  .bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin-bottom: 6px;
+    color: var(--ink-light);
+  }
+  .bar-label span:last-child {
+    font-family: 'DM Mono', monospace;
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .bar-track {
+    height: 8px;
+    background: var(--border);
+    position: relative;
+  }
+  .bar-fill {
+    height: 100%;
+    background: var(--red);
+    position: absolute;
+    left: 0;
+    top: 0;
+    transition: width 1s;
+  }
+  .bar-fill.blue { background: #1565C0; }
+  .bar-fill.green { background: #2E7D32; }
+  .bar-fill.gold { background: var(--gold); }
+
+  /* FOOTER */
+  footer {
+    background: var(--ink);
+    color: rgba(255,255,255,0.4);
+    padding: 24px 48px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    max-width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  @media (max-width: 700px) {
+    .masthead-inner, .exec-band-inner, .stats-inner, .main { padding: 0 20px; }
+    .stats-inner { grid-template-columns: repeat(2, 1fr); }
+    .company-grid { grid-template-columns: 1fr; }
+    .roadmap { grid-template-columns: repeat(2, 1fr); }
+    .section-body { padding-left: 0; }
+    .exec-band-inner { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<div class="masthead">
+  <div class="masthead-inner">
+    <div class="report-label">심층 분석 보고서 · 2026</div>
+    <h1>Toyota Automated Logistics<br><span>(TAL)</span> 신설 분석</h1>
+    <div class="masthead-sub">Bastian Solutions + Vanderlande + viastore 통합 창고 자동화 브랜드 출범</div>
+  </div>
+</div>
+
+<!-- EXEC SUMMARY -->
+<div class="exec-band">
+  <div class="exec-band-inner">
+    <div class="exec-label">Executive<br>Summary</div>
+    <div class="exec-text">
+      Toyota Industries Corporation은 <strong>2026년 4월</strong>을 목표로 창고 자동화 역량 전체를 <strong>'Toyota Automated Logistics(TAL)'</strong> 단일 브랜드로 통합한다. Bastian Solutions(미주), Vanderlande(글로벌 창고), viastore(유럽 중소형·제조)를 결합해 하드웨어·소프트웨어·라이프사이클 서비스의 <strong>엔드-투-엔드 자동화</strong>를 제공하는 구조다. 창고 자동화 시장은 2026년 <strong>341.7억 달러</strong> 규모이며 연평균 14% 성장이 전망되는 가운데, TAL은 규모·통합·지역 운영력이라는 세 가지 강점을 경쟁 무기로 삼는다.
+    </div>
+  </div>
+</div>
+
+<!-- STATS ROW -->
+<div class="stats-row">
+  <div class="stats-inner">
+    <div class="stat-item">
+      <div class="stat-num">341.7<span class="stat-unit">억$</span></div>
+      <div class="stat-desc">2026년 글로벌 창고 자동화 시장 규모</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">14<span class="stat-unit">%</span></div>
+      <div class="stat-desc">시장 연평균 성장률(CAGR 2026–2031)</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">3<span class="stat-unit">社</span></div>
+      <div class="stat-desc">통합 대상: Bastian · Vanderlande · viastore</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">6<span class="stat-unit">%</span></div>
+      <div class="stat-desc">Toyota Industries 물류 사업 부문 영업이익률 추정</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+
+  <!-- SECTION 1: TAL 출범 설계 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">01</div>
+      <div class="section-title">TAL의 정의와 출범 설계</div>
+    </div>
+    <div class="section-body">
+      <p>TAL은 Toyota Industries가 2017~2022년에 인수한 창고 자동화 3사를 하나의 지역 운영회사 체계로 묶는 '단계적 재편'의 결실이다. 전략 핵심은 <strong>(a) 미국·유럽 지역 운영회사 체계 구축, (b) Vanderlande 창고 사업의 TAL 이관 및 공항·택배 사업은 Vanderlande 독립 유지, (c) 유럽 내 viastore와의 통합, (d) 미국 내 Bastian과 Vanderlande 창고 사업 통합</strong>이다.</p>
+      <p>법적 제약으로 유럽 현지 Works Council(노동자 대표기구) 협의가 선행되어야 하며, Toyota Industries는 이를 전제로 2026년 4월 운영 개시를 '목표(aimed)'로 표현했다. 2026년 3월에는 지역 CEO 3인(중앙·EMEA+APAC·미주)이 공개됐다.</p>
+
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-date">2017</div>
+          <div class="tl-content">
+            <div class="tl-title">Bastian Solutions &amp; Vanderlande 인수</div>
+            <div class="tl-desc">Toyota Industries, 미주 시스템 통합사 Bastian 및 네덜란드 대형 자동화 Vanderlande 인수 합의</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">2022</div>
+          <div class="tl-content">
+            <div class="tl-title">viastore 인수</div>
+            <div class="tl-desc">유럽 중소형 창고·제조형 자동화 전문사 viastore 합류로 포트폴리오 확장</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">2024.05</div>
+          <div class="tl-content">
+            <div class="tl-title">Toyota Automated Logistics Group(TALG) 출범</div>
+            <div class="tl-desc">기존 Toyota L&amp;F와 인수 3사를 수용하는 그룹 단위 지주 구조 공식화</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">2024.09</div>
+          <div class="tl-content">
+            <div class="tl-title">Gideon 전략 투자</div>
+            <div class="tl-desc">비전 기반 AMR 소프트웨어 스타트업에 투자 — 모바일 자동화 역량 강화 신호</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">2025.11</div>
+          <div class="tl-content">
+            <div class="tl-title">TAL 브랜드 및 2026년 4월 통합 목표 공지</div>
+            <div class="tl-desc">단일 브랜드 명칭과 운영 개시 일정 공개</div>
+          </div>
+        </div>
+        <div class="tl-item highlight">
+          <div class="tl-date">2026.03</div>
+          <div class="tl-content">
+            <div class="tl-title">TAL 글로벌 리더십(지역 CEO 3인) 발표</div>
+            <div class="tl-desc">중앙·EMEA+APAC·미주 CEO 인선 공개</div>
+          </div>
+        </div>
+        <div class="tl-item highlight">
+          <div class="tl-date">2026.04 ★</div>
+          <div class="tl-content">
+            <div class="tl-title">TAL 운영 개시 목표</div>
+            <div class="tl-desc">현지 노사 협의 완료 전제 — 일정 변동 가능성 존재</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: 포트폴리오 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <div class="section-title">통합 범위와 기술·제품 포트폴리오</div>
+    </div>
+    <div class="section-body">
+      <p>TAL의 3사는 <strong>지역·산업·기술 축</strong>에서 상호 보완적으로 설계된다. 하드웨어부터 소프트웨어, 라이프사이클 서비스까지 '엔드-투-엔드' 가치사슬을 커버한다.</p>
+
+      <div class="company-grid">
+        <div class="company-card">
+          <div class="company-name">Bastian Solutions</div>
+          <div class="company-role">미주 통합 총괄 · 인테그레이터</div>
+          <div>
+            <span class="company-tag">WES: Exacta</span>
+            <span class="company-tag">GTP</span>
+            <span class="company-tag">컨베이어·소터</span>
+            <span class="company-tag">AGV/AMR 통합</span>
+          </div>
+          <div class="company-desc">Hardware-agnostic 모듈형 WES 중심의 오케스트레이션. 미주 중소~대형 DC, 이커머스, 음료·제약 GTP 레퍼런스 다수 보유.</div>
+        </div>
+        <div class="company-card blue">
+          <div class="company-name">Vanderlande</div>
+          <div class="company-role">대형 플랫폼 · AS/RS · 차세대 SW</div>
+          <div>
+            <span class="company-tag">AS/RS: ADAPTO/HDS</span>
+            <span class="company-tag">VISION SW</span>
+            <span class="company-tag">STOREPICK</span>
+            <span class="company-tag">FASTPICK</span>
+          </div>
+          <div class="company-desc">고처리량 셔틀·스태커 크레인 + 클라우드 기반 단일 플랫폼 VISION. 식품 리테일·이커머스 대형 프로젝트 강점. 공항·택배는 TAL 외 독립 유지.</div>
+        </div>
+        <div class="company-card green">
+          <div class="company-name">viastore</div>
+          <div class="company-role">유럽 중소형 · 제조형 창고</div>
+          <div>
+            <span class="company-tag">WMS+MFC: viadat</span>
+            <span class="company-tag">스태커크레인</span>
+            <span class="company-tag">ERP/MES 연동</span>
+          </div>
+          <div class="company-desc">시스템+소프트웨어+서비스 일체형. 유럽 내 3,000+ 시설 네트워크. 생산공급·JIT 자동화에서 WMS가 사실상 MES 역할까지 수행.</div>
+        </div>
+      </div>
+
+      <p style="margin-top:8px;"><strong>주요 고객 레퍼런스:</strong> Bastian — PUMA(Indiana, 이커머스 GTP), BioLegend(San Diego, 제약 냉장), Southern Glazer's(음료 유통). Vanderlande — Lyko(스웨덴, AS/RS 셔틀 216대), Netto(덴마크, 식품 자동 케이스 피킹). viastore — VACOM(스마트팩토리 MES 연계), Häcker Küchen(하루 10,000개 가구 생산공급).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: 사업모델·마진 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">03</div>
+      <div class="section-title">사업모델과 마진 구조 추정</div>
+    </div>
+    <div class="section-body">
+      <p>TAL의 매출원은 세 층위로 구성된다. 프로젝트형 장비·SI가 매출 볼륨의 대부분을 차지하지만, <strong>마진의 핵심은 서비스·소프트웨어의 반복매출</strong>이다.</p>
+
+      <table class="margin-table">
+        <thead>
+          <tr>
+            <th>매출 유형</th>
+            <th>구성 항목</th>
+            <th>영업이익률 추정</th>
+            <th>특성</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>프로젝트형 SI</strong></td>
+            <td>설계·설비·컨트롤·설치</td>
+            <td class="num low">2 ~ 6%</td>
+            <td>매출 볼륨 ↑, 현장 지연 리스크 有</td>
+          </tr>
+          <tr>
+            <td><strong>서비스·모더나이제이션</strong></td>
+            <td>24/7 모니터링·예방정비·스페어·업그레이드</td>
+            <td class="num mid">8 ~ 15%</td>
+            <td>설치 기반 확대 시 방어적 반복매출 성장</td>
+          </tr>
+          <tr>
+            <td><strong>소프트웨어</strong></td>
+            <td>WES/WMS/MFC 라이선스·구독·클라우드</td>
+            <td class="num good">15%+ (성장 시)</td>
+            <td>가장 빠른 성장세(SW CAGR 19.5%)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p><strong>경쟁사 벤치마크:</strong> KION(Dematic) Supply Chain Solutions 조정 EBIT 3.8%, Jungheinrich 종합 EBIT ROS 8.1%. Toyota Industries Materials Handling 세그먼트 영업이익률 약 6.0%. TAL의 현실적 목표 마진대는 프로젝트 믹스에 따라 <strong>4~8% 구간</strong>으로 추정된다.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: 시장·경쟁 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">04</div>
+      <div class="section-title">시장 전망과 경쟁 구도</div>
+    </div>
+    <div class="section-body">
+      <p>세 가지 동시 고성장 영역이 TAL의 기회 공간을 형성한다.</p>
+
+      <div class="market-bars">
+        <div class="bar-item">
+          <div class="bar-label">
+            <span>창고 자동화 전체 시장 (2026→2031)</span>
+            <span>341.7억$ → 657.4억$ · CAGR 14%</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill" style="width:52%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label">
+            <span>모바일 로봇(AGV→AMR) 시장 (2024→2030)</span>
+            <span>~50억$ → 140억$ · CAGR 19%</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill blue" style="width:36%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label">
+            <span>창고 자동화 관련 소프트웨어 (2023→2030)</span>
+            <span>22억$ → 77억$ · CAGR 19.5%</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill gold" style="width:28%"></div></div>
+        </div>
+      </div>
+
+      <p>AGV에서 AMR으로의 전환(비중 33%→20%)은 TAL이 Gideon 투자를 통해 준비 중인 '모바일+고정 통합 자동화' 제안의 타이밍을 뒷받침한다. 소프트웨어는 WMS 경계 붕괴로 자동화 벤더가 WMS를 제공하고, WMS 벤더가 오케스트레이션으로 확장하는 '레이어 경쟁'이 심화되고 있다.</p>
+      <p><strong>주요 경쟁사:</strong> KION(Dematic) — 트럭+창고 자동화, SCS 수주 증가세. Jungheinrich — 2024년 EBIT ROS 8.1%의 종합 intralogistics. Honeywell Intelligrated, Swisslog 등도 엔드-투-엔드를 표방하며 동일 방향으로 이동 중이다.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: 지게차 시너지 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">05</div>
+      <div class="section-title">지게차·Material Handling과의 시너지 및 내재 과제</div>
+    </div>
+    <div class="section-body">
+      <p>TAL의 진정한 전략적 가치는 Toyota Material Handling Group의 자율 지게차(Autopilot 라인업), T-ONE(AGV 통합 레이어), I-Site(텔레매틱스) 자산과의 결합에서 나온다. <strong>(고정 설비 자동화) + (모바일 자동화: AGV/AMR/자율 지게차) + (통합 SW/데이터)</strong>를 하나의 가치제안으로 묶어 '운영 최적화 계약(Outcome-based)'으로 확장할 수 있다.</p>
+      <p>그러나 내부 통합 과제도 세 가지가 명확히 존재한다.</p>
+      <div class="risk-list">
+        <div class="risk-item">
+          <div class="risk-type">SW 스택</div>
+          <div>
+            <div class="risk-title">오케스트레이션 레이어 중복·경합</div>
+            <div class="risk-body">Exacta(WES), VISION, viadat(WMS/MFC), T-ONE — 4개 플랫폼이 공존하며 '어느 것이 상위 오케스트레이션인가'를 정해야 한다. 통합비용의 핵심.</div>
+          </div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-type mid">조직 분절</div>
+          <div>
+            <div class="risk-title">Vanderlande의 이원화 구조</div>
+            <div class="risk-body">창고는 TAL, 공항·택배는 Vanderlande 독립 유지. 계정 전략·제품 로드맵·서비스 운영이 이원화될 위험.</div>
+          </div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-type low">일정 리스크</div>
+          <div>
+            <div class="risk-title">Works Councils 협의 지연 가능성</div>
+            <div class="risk-body">유럽 현지 법령상 노동자 대표기구 협의 완료가 선행 요건. 지연 시 2026년 4월 일정 이동 가능.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6: 리스크·시나리오 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">06</div>
+      <div class="section-title">재무 시나리오 추정 (2027–2030)</div>
+    </div>
+    <div class="section-body">
+      <p>창고 자동화 시장 CAGR 14%와 TAL의 점유율 4~8% 가정 기반 Top-down 추정. 영업이익률은 KION 벤치마크와 서비스·소프트웨어 믹스 가정을 반영했다.</p>
+
+      <table class="scenario-table">
+        <thead>
+          <tr>
+            <th style="text-align:left">시나리오</th>
+            <th>2027 매출</th>
+            <th>2030 매출</th>
+            <th>2030 영업이익률</th>
+            <th>누적 영업이익<br>(27~30)</th>
+            <th>단순 ROI</th>
+            <th>투자회수</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="row-bear">
+            <td class="label">보수</td>
+            <td class="num">15.6억$</td>
+            <td class="num">26.0억$</td>
+            <td class="num">4%</td>
+            <td class="num">2.3억$</td>
+            <td class="num">0.83x</td>
+            <td>2030 이후</td>
+          </tr>
+          <tr class="row-base">
+            <td class="label">기준</td>
+            <td class="num">23.4억$</td>
+            <td class="num">37.5억$</td>
+            <td class="num">6%</td>
+            <td class="num">6.5억$</td>
+            <td class="num">1.44x</td>
+            <td>2029년</td>
+          </tr>
+          <tr class="row-bull">
+            <td class="label">낙관</td>
+            <td class="num">31.2억$</td>
+            <td class="num">49.0억$</td>
+            <td class="num">8%</td>
+            <td class="num">11.3억$</td>
+            <td class="num">2.05x</td>
+            <td>2028년</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p><strong>핵심 감도 변수:</strong> 점유율 ±1%p = 2030 매출 ±5.8억 달러. 영업이익률 ±1%p = 연간 영업이익에 매출 대비 1%만큼 영향. 프로젝트 지연·변경(variation order)이 이익률의 최대 하방 리스크.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 7: 권고안 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">07</div>
+      <div class="section-title">전략 권고안 5가지와 실행 로드맵</div>
+    </div>
+    <div class="section-body">
+      <p>"통합 브랜드 출범"을 성과로 착각하지 않고, <strong>소프트웨어 레이어·서비스 반복매출·모바일 자동화 통합</strong>을 3대 전략 축으로 실행해야 한다.</p>
+
+      <div class="rec-list">
+        <div class="rec-item">
+          <div class="rec-num">01</div>
+          <div>
+            <div class="rec-title">상위 오케스트레이션 레이어 '표준 API' 정의</div>
+            <div class="rec-body">Exacta·VISION·viadat·T-ONE이 공존하더라도 고객이 '하나의 운영 콘솔'로 느끼도록 통합 계층을 먼저 정의한다. SW 스택 통합이 하드웨어보다 우선이다.</div>
+          </div>
+        </div>
+        <div class="rec-item">
+          <div class="rec-num">02</div>
+          <div>
+            <div class="rec-title">서비스·모더나이제이션을 '수주 파이프라인'과 분리 관리</div>
+            <div class="rec-body">프로젝트 경기 변동을 흡수하는 방어선으로 서비스가 기능하도록 조직 KPI·예산·영업 보상체계를 별도 설계한다.</div>
+          </div>
+        </div>
+        <div class="rec-item">
+          <div class="rec-num">03</div>
+          <div>
+            <div class="rec-title">'모바일 자동화'를 TAL 핵심 카테고리로 재정의</div>
+            <div class="rec-body">Gideon 투자 목적(표준화·배치시간 단축)을 제품 전략에 명시적으로 반영. '설치가 빠른 자동화'를 차별화 KPI로 운영한다.</div>
+          </div>
+        </div>
+        <div class="rec-item">
+          <div class="rec-num">04</div>
+          <div>
+            <div class="rec-title">산업별 패키지 표준화 (식품 리테일·이커머스·제조·제약)</div>
+            <div class="rec-body">Vanderlande(리테일), viastore(제조형), Bastian(미주 GTP)의 강점을 '템플릿'으로 묶어 견적·설계 리드타임을 단축한다.</div>
+          </div>
+        </div>
+        <div class="rec-item">
+          <div class="rec-num">05</div>
+          <div>
+            <div class="rec-title">노사·규제 커뮤니케이션을 PMI의 '선행 게이트'로 운영</div>
+            <div class="rec-body">Works Councils 협의를 일정 변수로 관리. 통합 순서를 '서비스 운영 → 영업 → R&amp;D → 법인 병합' 순으로 설계해 리스크를 최소화한다.</div>
+          </div>
+        </div>
+      </div>
+
+      <p style="margin-top:24px;font-weight:700;color:var(--ink);">연도별 실행 로드맵</p>
+      <div class="roadmap">
+        <div class="roadmap-col">
+          <div class="roadmap-year">2026</div>
+          <div class="roadmap-item">TAL 브랜드 출범 및 지역 운영 확정</div>
+          <div class="roadmap-item">고객 SLA·계약 통합 가이드 발표</div>
+          <div class="roadmap-item">통합 서비스 데스크(Tier 1) 공동 운영</div>
+        </div>
+        <div class="roadmap-col">
+          <div class="roadmap-year">2027</div>
+          <div class="roadmap-item">통합 오케스트레이션 표준 API 공개</div>
+          <div class="roadmap-item">원격 모니터링 공통 메트릭 정의</div>
+          <div class="roadmap-item">모더나이제이션 프로그램 상업화</div>
+        </div>
+        <div class="roadmap-col">
+          <div class="roadmap-year">2028</div>
+          <div class="roadmap-item">모바일+고정 자동화 통합 패키지 출시</div>
+          <div class="roadmap-item">반복매출 비중 KPI 전사 목표 격상</div>
+          <div class="roadmap-item">식품 리테일·이커머스 산업 패키지 공식화</div>
+        </div>
+        <div class="roadmap-col">
+          <div class="roadmap-year">2029–30</div>
+          <div class="roadmap-item">구독·관리형 계약 비중 확대</div>
+          <div class="roadmap-item">SW 고성장 구간에서 마진 믹스 개선</div>
+          <div class="roadmap-item">SI 중심 → 플랫폼+서비스 중심으로 전환</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <span>Toyota Automated Logistics (TAL) 심층 분석 보고서 · 2026년 3월 기준</span>
+  <span>출처: Vanderlande, Bastian Solutions, viastore, Toyota Industries, Mordor Intelligence, Interact Analysis, KION, Jungheinrich</span>
+</footer>
+
+</body>
+</html>

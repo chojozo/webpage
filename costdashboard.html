@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수익성 강화 활동 Dashboard 1분기</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- 차트 수치 표시를 위한 플러그인 -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="data.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', 'Noto Sans KR', sans-serif; background-color: #f8fafc; height: 100vh; overflow: hidden; }
+        .dashboard-container { height: calc(100vh - 64px); display: flex; flex-direction: column; }
+        .scrollable { overflow-y: auto; scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+        .scrollable::-webkit-scrollbar { width: 6px; }
+        .scrollable::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 3px; }
+        .active-tab { border-bottom: 3px solid #3b82f6; color: #3b82f6; font-weight: 700; }
+        .active-chip { background-color: #3b82f6 !important; color: white !important; border-color: #3b82f6 !important; }
+        .status-badge { padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+        .status-delayed { background-color: #fee2e2; color: #ef4444; }
+        .status-imminent { background-color: #fef3c7; color: #d97706; }
+        .status-normal { background-color: #dcfce7; color: #16a34a; }
+        .table-row:hover { background-color: #f1f5f9; cursor: pointer; }
+        .sub-menu-bar { border-bottom: 1px solid #e2e8f0; background: white; flex-shrink: 0; }
+        
+        .year-btn { font-size: 10px; padding: 2px 8px; border-radius: 4px; transition: all 0.2s; border: 1px solid transparent; }
+        .year-btn-active { background-color: white; color: #3b82f6; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border-color: #e2e8f0; font-weight: 700; }
+        .year-btn-inactive { color: #94a3b8; }
+        .year-btn-inactive:hover { color: #64748b; }
+
+        .main-fixed-section { flex-shrink: 0; }
+        .main-scroll-section { flex-grow: 1; min-height: 0; }
+    </style>
+</head>
+<body>
+
+    <!-- 0) 상단 고정바 -->
+    <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-50">
+        <div class="flex items-center gap-4">
+            <div>
+                <h1 class="text-lg font-bold text-slate-800">수익성 강화 활동 Dashboard</h1>
+                <p id="header-info" class="text-[10px] text-slate-400">로딩 중...</p>
+            </div>
+        </div>
+
+        <nav class="flex gap-8 h-full items-center">
+            <button onclick="switchView('main')" id="tab-main" class="h-full px-2 active-tab transition-all">전체 요약</button>
+            <button onclick="switchView('factory')" id="tab-factory" class="h-full px-2 text-slate-500 hover:text-blue-500 transition-all font-medium">공장별</button>
+            <button onclick="switchView('project')" id="tab-project" class="h-full px-2 text-slate-500 hover:text-blue-500 transition-all font-medium">사업별</button>
+        </nav>
+
+        <div class="flex items-center gap-3">
+            <input type="file" id="excel-upload" accept=".xlsx,.xls" class="hidden" onchange="handleExcelUpload(event)">
+            <button onclick="document.getElementById('excel-upload').click()" class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                엑셀 업로드
+            </button>
+            <button onclick="downloadTemplate()" class="flex items-center gap-1.5 px-3 py-1.5 bg-white text-slate-600 text-sm font-medium rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                양식 다운로드
+            </button>
+            <button onclick="exportDataJS()" class="flex items-center gap-1.5 px-3 py-1.5 bg-green-500 text-white text-sm font-medium rounded-lg hover:bg-green-600 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                저장
+            </button>
+        </div>
+    </header>
+
+    <main id="view-container" class="dashboard-container">
+        <!-- 콘텐츠가 여기에 렌더링됩니다 -->
+    </main>
+
+    <script>
+        Chart.register(ChartDataLabels);
+
+        // 전체 데이터 (모든 연도)
+        let allData = [];
+        // 기준연도 데이터만 (KPI, 테이블, 도넛, 원가항목 차트용)
+        let mockData = [];
+        // 기준연도 (data.js의 BASE_YEAR 또는 현재년도)
+        let baseYear = (typeof BASE_YEAR !== 'undefined') ? BASE_YEAR : new Date().getFullYear();
+
+        const yearlyChartData = {};
+
+        let currentView = 'main';
+        let currentSubCategory = '전체';
+        let chartInstances = { factory: null, project: null, cost: null, sub1: null, sub2: null, subBar: null };
+
+        function getStatus(finishDate) {
+            const today = new Date('2025-05-22');
+            const target = new Date(finishDate);
+            const diffDays = (target - today) / (1000 * 60 * 60 * 24);
+            if (diffDays < 0) return { label: '지연', class: 'status-delayed' };
+            if (diffDays <= 30) return { label: '임박', class: 'status-imminent' };
+            return { label: '진행', class: 'status-normal' };
+        }
+
+        function formatMoney(val) { return new Intl.NumberFormat('ko-KR').format(Math.trunc(val)); }
+
+        function switchView(view) {
+            currentView = view;
+            currentSubCategory = '전체';
+            document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active-tab', 'text-slate-800'));
+            document.querySelectorAll('nav button').forEach(btn => btn.classList.add('text-slate-500'));
+            const activeTab = document.getElementById(`tab-${view}`);
+            if(activeTab) { activeTab.classList.add('active-tab'); activeTab.classList.remove('text-slate-500'); }
+            renderView();
+        }
+
+        function renderView() {
+            const container = document.getElementById('view-container');
+            container.innerHTML = '';
+            if (currentView === 'main') { renderMainView(container); } 
+            else { renderCategoryLayout(container); }
+        }
+
+        // content 기준으로 동일과제 병합 (전체요약 Top10용)
+        function getMergedTasks(data) {
+            const map = {};
+            data.forEach(row => {
+                const key = row.content;
+                if (!key) return; // 빈 content 제외
+                if (!map[key]) {
+                    map[key] = {
+                        content: key,
+                        planAmount: 0,
+                        actualAmount: 0,
+                        factories: new Set(),
+                        projects: new Set(),
+                        costItems: new Set(),
+                        types: new Set(),
+                        rows: []
+                    };
+                }
+                map[key].planAmount += row.planAmount;
+                map[key].actualAmount += row.actualAmount;
+                map[key].factories.add(row.factory);
+                map[key].projects.add(row.project);
+                map[key].costItems.add(row.costItem);
+                if (row.type) map[key].types.add(row.type);
+                map[key].rows.push(row);
+            });
+            return Object.values(map);
+        }
+
+        function renderMainView(container) {
+            const totalPlan = mockData.reduce((acc, cur) => acc + cur.planAmount, 0);
+            const totalActual = mockData.reduce((acc, cur) => acc + cur.actualAmount, 0);
+            const taskCount = mockData.length;
+            const startedCount = mockData.filter(d => d.actualAmount > 0).length;
+            const mergedTasks = getMergedTasks(mockData);
+            const mergedTop10 = [...mergedTasks].sort((a,b) => b.planAmount - a.planAmount).slice(0, 10);
+            const top10Sum = mergedTop10.reduce((a,c) => a + c.planAmount, 0);
+            const t10Pct = totalPlan > 0 ? (top10Sum * 100 / totalPlan).toFixed(1) : 0;
+
+            container.innerHTML = `
+                <div class="main-fixed-section p-4 pb-0">
+                    <div class="grid grid-cols-6 gap-4 mb-4">
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-center">
+                            <p class="text-slate-500 text-xs font-bold uppercase mb-0.5">계획 합계</p>
+                            <h3 class="text-lg font-bold text-slate-800">${formatMoney(totalPlan)}<span class="text-[10px] font-normal ml-0.5">천원</span></h3>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-center">
+                            <p class="text-slate-500 text-xs font-bold uppercase mb-0.5 text-blue-500">실적 합계</p>
+                            <h3 class="text-lg font-bold text-blue-600">${formatMoney(totalActual)}<span class="text-[10px] font-normal ml-0.5 text-slate-800">천원</span></h3>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-center">
+                            <p class="text-slate-500 text-xs font-bold uppercase mb-0.5 text-green-500">계획대비 실적</p>
+                            <h3 class="text-lg font-bold ${totalPlan > 0 ? (totalActual * 100 / totalPlan >= 60 ? 'text-green-600' : 'text-orange-500') : 'text-slate-800'}">${totalPlan > 0 ? (totalActual * 100 / totalPlan).toFixed(1) : 0}<span class="text-[10px] font-normal ml-0.5">%</span></h3>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-center">
+                            <p class="text-slate-500 text-xs font-bold uppercase mb-0.5">전체 과제 수</p>
+                            <h3 class="text-lg font-bold text-slate-800">${taskCount}<span class="text-[10px] font-normal ml-0.5">건</span></h3>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-center">
+                            <p class="text-slate-500 text-xs font-bold uppercase mb-0.5 text-green-500">진행과제</p>
+                            <h3 class="text-lg font-bold text-green-600">${startedCount}<span class="text-[10px] font-normal ml-0.5 text-slate-800">건</span></h3>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-center">
+                            <p class="text-slate-500 text-xs font-bold uppercase mb-0.5">금액 집중도(T10)</p>
+                            <h3 class="text-lg font-bold text-slate-800">${t10Pct}<span class="text-[10px] font-normal ml-0.5">%</span></h3>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-4 mb-4">
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm h-[322px] flex flex-col">
+                            <p class="text-xs font-bold text-slate-700 mb-1 uppercase tracking-tight">공장별 연간 절감금액 (3개년)</p>
+                            <div class="flex-1 min-h-0"><canvas id="chart-factory"></canvas></div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm h-[322px] flex flex-col">
+                            <p class="text-xs font-bold text-slate-700 mb-1 uppercase tracking-tight">사업부별 연간 절감금액 (3개년)</p>
+                            <div class="flex-1 min-h-0"><canvas id="chart-project"></canvas></div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm h-[322px] flex flex-col">
+                            <p class="text-xs font-bold text-slate-700 mb-1 uppercase tracking-tight">원가항목별 연간 절감금액 (3개년)</p>
+                            <div class="flex-1 min-h-0"><canvas id="chart-cost"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="main-scroll-section px-4 pb-4 flex flex-col">
+                    <div class="grid grid-cols-3 gap-4 h-full overflow-hidden">
+                        <div class="col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
+                            <div class="p-3 border-b border-slate-100 bg-slate-50 flex justify-between items-center shrink-0">
+                                <h3 class="text-xs font-bold text-slate-700 uppercase">핵심 과제 Top 10 (전사 기준)</h3>
+                            </div>
+                            <div class="overflow-y-auto flex-1 scrollable">
+                                <table class="w-full text-left text-[13px]">
+                                    <thead class="bg-white sticky top-0 z-10 font-medium border-b border-slate-200">
+                                        <tr>
+                                            <th class="px-4 py-2 font-semibold text-[11px] uppercase text-slate-400">공장/사업</th>
+                                            <th class="px-4 py-2 font-semibold text-[11px] uppercase text-slate-600">세부추진내용</th>
+                                            <th class="px-4 py-2 font-semibold text-[11px] uppercase text-right">계획금액</th>
+                                            <th class="px-4 py-2 font-semibold text-[11px] uppercase text-right">실적금액</th>
+                                            <th class="px-4 py-2 font-semibold text-[11px] uppercase text-center">진척률</th>
+                                            <th class="px-4 py-2 font-semibold text-[11px] uppercase text-center">상태</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100">
+                                        ${mergedTop10.map((mt, idx) => {
+                                            const pct = mt.planAmount > 0 ? (mt.actualAmount * 100 / mt.planAmount) : 0;
+                                            const st = pct > 0 ? { label: '진행', class: 'status-normal' } : { label: '미진행', class: 'status-delayed' };
+                                            const factories = [...mt.factories].join(',');
+                                            const projects = [...mt.projects].join(',');
+                                            const teamCount = mt.rows.length;
+                                            const escapedContent = mt.content.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                                            return `<tr class="table-row" onclick="showMergedDetail('${escapedContent}')">
+                                                <td class="px-4 py-2.5 font-medium text-slate-700">${factories} / ${projects}${teamCount > 1 ? ' <span class="text-[10px] text-blue-500 font-bold">(' + teamCount + '팀)</span>' : ''}</td>
+                                                <td class="px-4 py-2.5 text-slate-500 truncate max-w-[300px]">${mt.content}</td>
+                                                <td class="px-4 py-2.5 text-right font-bold text-slate-800">${formatMoney(mt.planAmount)}</td>
+                                                <td class="px-4 py-2.5 text-right font-bold text-blue-600">${formatMoney(mt.actualAmount)}</td>
+                                                <td class="px-4 py-2.5 text-center font-bold ${pct >= 60 ? 'text-green-600' : pct > 0 ? 'text-orange-500' : 'text-slate-400'}">${pct.toFixed(1)}%</td>
+                                                <td class="px-4 py-2.5 text-center"><span class="status-badge ${st.class}">${st.label}</span></td>
+                                            </tr>`;
+                                        }).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div id="main-detail-panel" class="bg-slate-50 border border-slate-200 flex flex-col p-6 rounded-xl overflow-y-auto scrollable">
+                            <div class="flex flex-col items-center justify-center h-full text-slate-400 text-center gap-3">
+                                <svg class="w-10 h-10 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <p class="text-xs">과제를 클릭하면 상세 내용이 표시됩니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            initMainCharts();
+        }
+
+        function renderCategoryLayout(container) {
+            const configMap = {
+                factory: { label: '공장', key: 'factory' },
+                project: { label: '사업', key: 'project' }
+            };
+            const config = configMap[currentView];
+            const uniqueItems = ['전체', ...new Set(mockData.map(d => d[config.key]))];
+
+            const subMenuBar = document.createElement('div');
+            subMenuBar.className = 'sub-menu-bar px-6 py-3 flex items-center gap-2 overflow-x-auto scrollable';
+            subMenuBar.innerHTML = `
+                <span class="text-[10px] font-bold text-slate-400 mr-2 uppercase tracking-tighter shrink-0">${config.label} 선택:</span>
+                ${uniqueItems.map(item => {
+                    const count = item === '전체' ? mockData.length : mockData.filter(d => d[config.key] === item).length;
+                    return `<button onclick="setSubCategory('${item}')" class="sub-chip px-4 py-1.5 rounded-full border border-slate-200 text-sm font-medium text-slate-600 hover:border-blue-400 hover:bg-blue-50 transition-all whitespace-nowrap ${item === currentSubCategory ? 'active-chip' : 'bg-white'}">
+                        ${item} <span class="ml-1 opacity-60 text-xs">(${count})</span>
+                    </button>`
+                }).join('')}
+            `;
+            container.appendChild(subMenuBar);
+
+            const mainSection = document.createElement('div');
+            mainSection.className = 'flex-1 flex flex-col overflow-hidden';
+            mainSection.id = 'category-main-section';
+            container.appendChild(mainSection);
+            updateSubCategoryContent();
+        }
+
+        function setSubCategory(item) { currentSubCategory = item; updateSubCategoryContent(); }
+
+        function updateSubCategoryContent() {
+            const configMap = { factory: { label: '공장별', key: 'factory' }, project: { label: '사업별', key: 'project' } };
+            const config = configMap[currentView];
+            const section = document.getElementById('category-main-section');
+            if (!section) return;
+
+            document.querySelectorAll('.sub-chip').forEach(btn => {
+                if (btn.innerText.startsWith(currentSubCategory)) btn.classList.add('active-chip');
+                else btn.classList.remove('active-chip');
+            });
+
+            const filteredData = currentSubCategory === '전체' ? [...mockData] : mockData.filter(d => d[config.key] === currentSubCategory);
+            const totalPlan = filteredData.reduce((acc, cur) => acc + cur.planAmount, 0);
+            const totalActual = filteredData.reduce((acc, cur) => acc + cur.actualAmount, 0);
+            const startedCount = filteredData.filter(d => d.actualAmount > 0).length;
+            const subTop10Sum = [...filteredData].sort((a,b) => b.planAmount - a.planAmount).slice(0,10).reduce((a,c) => a + c.planAmount, 0);
+            const subT10Pct = totalPlan > 0 ? (subTop10Sum * 100 / totalPlan).toFixed(1) : 0;
+
+            section.innerHTML = `
+                <div class="flex-1 flex flex-col gap-4 overflow-hidden p-4">
+                    <!-- KPI 카드 -->
+                    <div class="grid grid-cols-6 gap-4 shrink-0">
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-center">
+                            <p class="text-slate-500 text-xs font-bold uppercase mb-0.5">${currentSubCategory} 계획 합계</p>
+                            <h3 class="text-lg font-bold text-slate-800">${formatMoney(totalPlan)}<span class="text-[10px] font-normal ml-0.5">천원</span></h3>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-center">
+                            <p class="text-slate-500 text-xs font-bold uppercase mb-0.5 text-blue-500">실적 합계</p>
+                            <h3 class="text-lg font-bold text-blue-600">${formatMoney(totalActual)}<span class="text-[10px] font-normal ml-0.5 text-slate-800">천원</span></h3>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-center">
+                            <p class="text-slate-500 text-xs font-bold uppercase mb-0.5 text-green-500">계획대비 실적</p>
+                            <h3 class="text-lg font-bold ${totalPlan > 0 ? (totalActual * 100 / totalPlan >= 60 ? 'text-green-600' : 'text-orange-500') : 'text-slate-800'}">${totalPlan > 0 ? (totalActual * 100 / totalPlan).toFixed(1) : 0}<span class="text-[10px] font-normal ml-0.5">%</span></h3>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-center">
+                            <p class="text-slate-500 text-xs font-bold uppercase mb-0.5">전체 과제 수</p>
+                            <h3 class="text-lg font-bold text-slate-800">${filteredData.length}<span class="text-[10px] font-normal ml-0.5">건</span></h3>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-center">
+                            <p class="text-slate-500 text-xs font-bold uppercase mb-0.5 text-green-500">진행과제</p>
+                            <h3 class="text-lg font-bold text-green-600">${startedCount}<span class="text-[10px] font-normal ml-0.5 text-slate-800">건</span></h3>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-center">
+                            <p class="text-slate-500 text-xs font-bold uppercase mb-0.5">금액 집중도(T10)</p>
+                            <h3 class="text-lg font-bold text-slate-800">${subT10Pct}<span class="text-[10px] font-normal ml-0.5">%</span></h3>
+                        </div>
+                    </div>
+
+                    <!-- 차트 영역 -->
+                    <div class="grid grid-cols-3 gap-4 shrink-0">
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm h-[268px] flex flex-col">
+                            <p class="text-xs font-bold text-slate-700 mb-1 uppercase tracking-tight">${currentView === 'factory' ? '공장' : '사업'}별 연간 절감금액 (3개년)</p>
+                            <div class="flex-1 min-h-0"><canvas id="sub-chart-bar"></canvas></div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm h-[268px] flex flex-col">
+                            <p class="text-xs font-bold text-slate-700 mb-1 uppercase tracking-tight">${currentView === 'factory' ? '사업별' : '공장별'} 절감금액 (${baseYear}년)</p>
+                            <div class="flex-1 min-h-0"><canvas id="sub-chart-1"></canvas></div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm h-[268px] flex flex-col">
+                            <div class="flex justify-between items-center mb-1">
+                                <p class="text-xs font-bold text-slate-700 uppercase tracking-tight">원가항목별 절감금액 (${baseYear}년)</p>
+                                <div id="cost-filter-btns" class="flex gap-1">
+                                    <button onclick="filterCostChart('전체')" class="cost-filter-btn text-[9px] px-2 py-0.5 rounded border border-slate-200 bg-blue-500 text-white font-bold">전체</button>
+                                    ${[...new Set(filteredData.map(d => d[currentView === 'factory' ? 'project' : 'factory']))].filter(x=>x).map(name =>
+                                        '<button onclick="filterCostChart(\'' + name + '\')" class="cost-filter-btn text-[9px] px-2 py-0.5 rounded border border-slate-200 bg-white text-slate-500 font-medium hover:border-blue-400">' + name + '</button>'
+                                    ).join('')}
+                                </div>
+                            </div>
+                            <div class="flex-1 min-h-0"><canvas id="sub-chart-2"></canvas></div>
+                        </div>
+                    </div>
+
+                    <!-- 하단: 테이블 + 상세패널 -->
+                    <div class="grid grid-cols-3 gap-4 flex-1 overflow-hidden">
+                        <div class="col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+                            <div class="p-3 border-b border-slate-100 bg-slate-50 flex justify-between items-center shrink-0">
+                                <h3 class="text-xs font-bold text-slate-700 uppercase">${currentSubCategory} 주요 과제 리스트 (${filteredData.length}건)</h3>
+                            </div>
+                            <div class="overflow-y-auto flex-1 scrollable">
+                                <table class="w-full text-left text-[13px]">
+                                    <thead class="bg-white sticky top-0 z-10 border-b border-slate-200 shadow-sm">
+                                        <tr>
+                                            <th class="px-4 py-2 text-slate-400 text-[11px] uppercase">${currentView === 'factory' ? '사업' : '공장'}</th>
+                                            <th class="px-4 py-2 text-slate-400 text-[11px] uppercase">팀/분류</th>
+                                            <th class="px-4 py-2 text-slate-400 text-[11px] uppercase">추진내용</th>
+                                            <th class="px-4 py-2 text-right text-slate-400 text-[11px] uppercase">계획금액</th>
+                                            <th class="px-4 py-2 text-right text-slate-400 text-[11px] uppercase">실적금액</th>
+                                            <th class="px-4 py-2 text-center text-slate-400 text-[11px] uppercase">진척률</th>
+                                            <th class="px-4 py-2 text-center text-slate-400 text-[11px] uppercase">상태</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100">
+                                        ${filteredData.sort((a,b) => b.planAmount - a.planAmount).map(row => {
+                                            const pct = row.planAmount > 0 ? (row.actualAmount * 100 / row.planAmount) : 0;
+                                            const st = pct > 0 ? { label: '진행', class: 'status-normal' } : { label: '미진행', class: 'status-delayed' };
+                                            return `<tr class="table-row" onclick="showTaskDetail(${row.id})">
+                                                <td class="px-4 py-2.5 font-medium text-slate-700">${currentView === 'factory' ? row.project : row.factory}</td>
+                                                <td class="px-4 py-2.5 text-slate-500 text-[11px] leading-tight">${row.team}<br><span class="text-[9px] opacity-70">${row.subCategory}</span></td>
+                                                <td class="px-4 py-2.5 text-slate-600 truncate max-w-[200px]">${row.content}</td>
+                                                <td class="px-4 py-2.5 text-right font-bold text-slate-800">${formatMoney(row.planAmount)}</td>
+                                                <td class="px-4 py-2.5 text-right font-bold text-blue-600">${formatMoney(row.actualAmount)}</td>
+                                                <td class="px-4 py-2.5 text-center font-bold ${pct >= 60 ? 'text-green-600' : pct > 0 ? 'text-orange-500' : 'text-slate-400'}">${pct.toFixed(1)}%</td>
+                                                <td class="px-4 py-2.5 text-center"><span class="status-badge ${st.class}">${st.label}</span></td>
+                                            </tr>`;
+                                        }).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div id="detail-panel" class="bg-slate-50 border border-slate-200 flex flex-col p-6 rounded-xl overflow-y-auto scrollable">
+                            <div class="flex flex-col items-center justify-center h-full text-slate-400 text-center gap-3">
+                                <svg class="w-10 h-10 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <p class="text-xs">과제를 클릭하면 상세 내용이 표시됩니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            initSubCharts(filteredData);
+        }
+
+        // 현재 서브 필터 데이터 저장 (오른쪽 차트 필터용)
+        let _subChartData = [];
+        let _costFilterSelected = '전체';
+
+        function initSubCharts(data) {
+            _subChartData = data;
+            _costFilterSelected = '전체';
+            const chart1Type = currentView === 'factory' ? 'project' : 'factory';
+            const barType = currentView === 'factory' ? 'factory' : 'project';
+
+            // 중간 차트 정렬 순서
+            const projectOrder = ['트랙', '전동', '컨베어'];
+            const rawLabels1 = [...new Set(data.map(d => d[chart1Type]))].filter(l => l);
+            const labels1 = rawLabels1.sort((a, b) => {
+                const ia = projectOrder.indexOf(a), ib = projectOrder.indexOf(b);
+                return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+            });
+
+            // 왼쪽 차트: 3개년 (그대로)
+            const y0 = baseYear, y1 = baseYear-1, y2 = baseYear-2;
+            const configKey = currentView === 'factory' ? 'factory' : 'project';
+            const subAllData = currentSubCategory === '전체' ? allData : allData.filter(d => d[configKey] === currentSubCategory);
+            const barLabels = [...new Set(subAllData.map(d => d[barType]))].filter(l => l);
+            const barValuesY2 = barLabels.map(l => subAllData.filter(d => d.year === y2 && d[barType] === l).reduce((a,c) => a+c.actualAmount, 0));
+            const barValuesY1 = barLabels.map(l => subAllData.filter(d => d.year === y1 && d[barType] === l).reduce((a,c) => a+c.actualAmount, 0));
+            const barValuesY0Plan = barLabels.map(l => subAllData.filter(d => d.year === y0 && d[barType] === l).reduce((a,c) => a+c.planAmount, 0));
+            const barValuesY0Actual = barLabels.map(l => subAllData.filter(d => d.year === y0 && d[barType] === l).reduce((a,c) => a+c.actualAmount, 0));
+            if(chartInstances.subBar) chartInstances.subBar.destroy();
+            chartInstances.subBar = new Chart(document.getElementById('sub-chart-bar'), {
+                type: 'bar',
+                data: { labels: barLabels, datasets: [
+                    { label: `${y2%100}년 실적`, data: barValuesY2, backgroundColor: '#cbd5e1' },
+                    { label: `${y1%100}년 실적`, data: barValuesY1, backgroundColor: '#3b82f6' },
+                    { label: `${y0%100}년 계획`, data: barValuesY0Plan, backgroundColor: '#1e3a8a' },
+                    { label: `${y0%100}년 실적`, data: barValuesY0Actual, backgroundColor: '#ef4444' }
+                ]},
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 8, font: { size: 11 }, padding: 5 } },
+                        datalabels: { anchor: 'end', align: 'top', formatter: (val) => (val/100000).toFixed(1), font: { weight: 'bold', size: 15 }, color: '#64748b' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, display: false },
+                        x: { grid: { display: false }, ticks: { font: { size: 11, weight: 'bold' } } }
+                    },
+                    layout: { padding: { top: 22 } }
+                }
+            });
+
+            // 중간 차트: 사업별/공장별 계획 vs 실적 (정렬 적용)
+            const planValues1 = labels1.map(l => data.filter(d => d[chart1Type] === l).reduce((a,c) => a+c.planAmount, 0));
+            const actualValues1 = labels1.map(l => data.filter(d => d[chart1Type] === l).reduce((a,c) => a+c.actualAmount, 0));
+
+            if(chartInstances.sub1) chartInstances.sub1.destroy();
+            chartInstances.sub1 = new Chart(document.getElementById('sub-chart-1'), {
+                type: 'bar',
+                data: { labels: labels1, datasets: [
+                    { label: '계획', data: planValues1, backgroundColor: '#1e3a8a' },
+                    { label: '실적', data: actualValues1, backgroundColor: '#ef4444' }
+                ]},
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 8, font: { size: 11 }, padding: 5 } },
+                        datalabels: { anchor: 'end', align: 'top', formatter: (val) => (val/100000).toFixed(1), font: { weight: 'bold', size: 15 }, color: '#64748b' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, display: false },
+                        x: { grid: { display: false }, ticks: { font: { size: 11, weight: 'bold' } } }
+                    },
+                    layout: { padding: { top: 22 } }
+                }
+            });
+
+            // 오른쪽 차트: 원가항목별 계획 vs 실적 (필터 기능 포함)
+            renderCostSubChart(data);
+        }
+
+        function filterCostChart(filterName) {
+            _costFilterSelected = filterName;
+            // 버튼 스타일 토글
+            document.querySelectorAll('.cost-filter-btn').forEach(btn => {
+                if (btn.textContent.trim() === filterName) {
+                    btn.classList.remove('bg-white', 'text-slate-500');
+                    btn.classList.add('bg-blue-500', 'text-white');
+                } else {
+                    btn.classList.remove('bg-blue-500', 'text-white');
+                    btn.classList.add('bg-white', 'text-slate-500');
+                }
+            });
+            const chart1Type = currentView === 'factory' ? 'project' : 'factory';
+            const filtered = filterName === '전체' ? _subChartData : _subChartData.filter(d => d[chart1Type] === filterName);
+            renderCostSubChart(filtered);
+        }
+
+        function renderCostSubChart(data) {
+            const costOrder = ['재료비', '가공비', '가격인상'];
+            const rawCostItems = [...new Set(data.map(d => d.costItem))].filter(c => c);
+            const costItems = rawCostItems.sort((a, b) => {
+                const ia = costOrder.indexOf(a), ib = costOrder.indexOf(b);
+                return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+            });
+            const costPlan = costItems.map(ci => data.filter(d => d.costItem === ci).reduce((a,c) => a+c.planAmount, 0));
+            const costActual = costItems.map(ci => data.filter(d => d.costItem === ci).reduce((a,c) => a+c.actualAmount, 0));
+
+            if(chartInstances.sub2) chartInstances.sub2.destroy();
+            chartInstances.sub2 = new Chart(document.getElementById('sub-chart-2'), {
+                type: 'bar',
+                data: { labels: costItems, datasets: [
+                    { label: '계획', data: costPlan, backgroundColor: '#1e3a8a' },
+                    { label: '실적', data: costActual, backgroundColor: '#ef4444' }
+                ]},
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 8, font: { size: 11 }, padding: 5 } },
+                        datalabels: { anchor: 'end', align: 'top', formatter: (val) => (val/100000).toFixed(1), font: { weight: 'bold', size: 15 }, color: '#64748b' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, display: false },
+                        x: { grid: { display: false }, ticks: { font: { size: 11, weight: 'bold' } } }
+                    },
+                    layout: { padding: { top: 22 } }
+                }
+            });
+        }
+
+        function showTaskDetail(taskId) {
+            const task = mockData.find(d => d.id === taskId);
+            if (!task) return;
+            const pct = task.planAmount > 0 ? (task.actualAmount * 100 / task.planAmount) : 0;
+            const st = pct > 0 ? { label: '진행', class: 'status-normal' } : { label: '미진행', class: 'status-delayed' };
+            const panel = document.getElementById('detail-panel');
+            panel.innerHTML = `
+                <div class="flex justify-between items-start mb-4">
+                    <span class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded">${task.type}</span>
+                    <span class="status-badge ${st.class}">${st.label}</span>
+                </div>
+                <h4 class="text-sm font-bold text-slate-800 mb-4 leading-snug">${task.content}</h4>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-5 gap-2">
+                        <div class="col-span-3 flex flex-col">
+                            <p class="text-[10px] text-slate-400 font-bold uppercase mb-1.5 tracking-wider">기본 정보</p>
+                            <div class="bg-white border border-slate-200 rounded-lg p-2.5 text-[11px] space-y-1.5 shadow-sm flex-1 flex flex-col justify-center">
+                                <div class="flex justify-between"><span class="text-slate-400">공장/사업</span><span class="font-medium text-slate-700">${task.factory}/${task.project}</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">원가항목</span><span class="font-medium text-slate-700">${task.costItem}</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">담당자</span><span class="font-medium text-slate-700">${task.owner}</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">팀</span><span class="font-medium text-slate-700">${task.team}</span></div>
+                            </div>
+                        </div>
+                        <div class="col-span-2 flex flex-col">
+                            <p class="text-[10px] text-slate-400 font-bold uppercase mb-1.5 tracking-wider">성과(천원)</p>
+                            <div class="flex flex-col gap-1.5 flex-1">
+                                <div class="bg-white border border-slate-200 rounded-lg p-2.5 text-center shadow-sm flex-1 flex flex-col justify-center"><p class="text-[9px] text-slate-400 mb-0.5 font-bold">계획금액</p><p class="text-sm font-bold text-slate-800">${formatMoney(task.planAmount)}</p></div>
+                                <div class="bg-blue-50 border border-blue-100 rounded-lg p-2.5 text-center shadow-sm flex-1 flex flex-col justify-center"><p class="text-[9px] text-blue-400 mb-0.5 font-bold">실적금액</p><p class="text-sm font-bold text-blue-700">${formatMoney(task.actualAmount)}</p></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-lg p-2.5 shadow-sm">
+                        <div class="flex justify-between text-[11px] mb-1"><span class="text-slate-400">진척률</span><span class="font-bold ${pct >= 60 ? 'text-green-600' : pct > 0 ? 'text-orange-500' : 'text-slate-400'}">${pct.toFixed(1)}%</span></div>
+                        <div class="w-full bg-slate-100 rounded-full h-2"><div class="h-2 rounded-full ${pct >= 60 ? 'bg-green-500' : pct > 0 ? 'bg-orange-400' : 'bg-slate-200'}" style="width: ${Math.min(pct, 100)}%"></div></div>
+                    </div>
+                    <section>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase mb-1.5 tracking-wider">주요과제 활동실적</p>
+                        <p class="text-[11px] text-slate-600 bg-white border border-slate-200 rounded-lg p-2.5 leading-relaxed shadow-sm whitespace-pre-line">${task.activity || '-'}</p>
+                    </section>
+                    ${task.note ? '<section><p class="text-[10px] text-slate-400 font-bold uppercase mb-1.5 tracking-wider">비고</p><p class="text-[11px] text-slate-600 bg-white border border-slate-200 rounded-lg p-2.5 leading-relaxed shadow-sm">' + task.note + '</p></section>' : ''}
+                </div>
+            `;
+            panel.classList.remove('bg-slate-50'); panel.classList.add('bg-white');
+        }
+
+        function showMainDetail(taskId) {
+            const task = mockData.find(d => d.id === taskId);
+            if (!task) return;
+            const pct = task.planAmount > 0 ? (task.actualAmount * 100 / task.planAmount) : 0;
+            const st = pct > 0 ? { label: '진행', class: 'status-normal' } : { label: '미진행', class: 'status-delayed' };
+            const panel = document.getElementById('main-detail-panel');
+            panel.innerHTML = `
+                <div class="flex justify-between items-start mb-6">
+                    <span class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded">${task.type}</span>
+                    <span class="status-badge ${st.class}">${st.label}</span>
+                </div>
+                <h4 class="text-base font-bold text-slate-800 mb-6 leading-snug">${task.content}</h4>
+                <div class="space-y-5">
+                    <section>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase mb-2 tracking-wider">기본 정보</p>
+                        <div class="bg-white border border-slate-200 rounded-lg p-3 text-[12px] space-y-2 shadow-sm">
+                            <div class="flex justify-between"><span class="text-slate-400">공장 / 사업</span><span class="font-medium text-slate-700">${task.factory} / ${task.project}</span></div>
+                            <div class="flex justify-between"><span class="text-slate-400">원가항목</span><span class="font-medium text-slate-700">${task.costItem}</span></div>
+                            <div class="flex justify-between"><span class="text-slate-400">담당자</span><span class="font-medium text-slate-700">${task.owner} (${task.team})</span></div>
+                        </div>
+                    </section>
+                    <section>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase mb-2 tracking-wider">성과 (천원)</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="bg-white border border-slate-200 rounded-lg p-3 text-center shadow-sm"><p class="text-[10px] text-slate-400 mb-1 font-bold">계획금액</p><p class="text-sm font-bold text-slate-800">${formatMoney(task.planAmount)}</p></div>
+                            <div class="bg-blue-50 border border-blue-100 rounded-lg p-3 text-center shadow-sm"><p class="text-[10px] text-blue-400 mb-1 font-bold">실적금액</p><p class="text-sm font-bold text-blue-700">${formatMoney(task.actualAmount)}</p></div>
+                        </div>
+                        <div class="mt-2 bg-white border border-slate-200 rounded-lg p-3 shadow-sm">
+                            <div class="flex justify-between text-[11px] mb-1"><span class="text-slate-400">진척률</span><span class="font-bold ${pct >= 60 ? 'text-green-600' : pct > 0 ? 'text-orange-500' : 'text-slate-400'}">${pct.toFixed(1)}%</span></div>
+                            <div class="w-full bg-slate-100 rounded-full h-2"><div class="h-2 rounded-full ${pct >= 60 ? 'bg-green-500' : pct > 0 ? 'bg-orange-400' : 'bg-slate-200'}" style="width: ${Math.min(pct, 100)}%"></div></div>
+                        </div>
+                    </section>
+                    <section>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase mb-2 tracking-wider">비고</p>
+                        <p class="text-[11px] text-slate-600 bg-white border border-slate-200 rounded-lg p-3 leading-relaxed shadow-sm">${task.note || '-'}</p>
+                    </section>
+                </div>
+            `;
+            panel.classList.remove('bg-slate-50'); panel.classList.add('bg-white');
+        }
+
+        function showMergedDetail(content) {
+            const merged = getMergedTasks(mockData).find(m => m.content === content);
+            if (!merged) return;
+            const pct = merged.planAmount > 0 ? (merged.actualAmount * 100 / merged.planAmount) : 0;
+            const st = pct > 0 ? { label: '진행', class: 'status-normal' } : { label: '미진행', class: 'status-delayed' };
+            const factories = [...merged.factories].join(', ');
+            const projects = [...merged.projects].join(', ');
+            const costItems = [...merged.costItems].join(', ');
+            const types = [...merged.types].join(', ');
+            const panel = document.getElementById('main-detail-panel');
+            panel.innerHTML = `
+                <div class="flex justify-between items-start mb-4">
+                    <span class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded">${types || '-'}</span>
+                    <span class="status-badge ${st.class}">${st.label}</span>
+                </div>
+                <h4 class="text-sm font-bold text-slate-800 mb-4 leading-snug">${merged.content}</h4>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-5 gap-2">
+                        <div class="col-span-3 flex flex-col">
+                            <p class="text-[10px] text-slate-400 font-bold uppercase mb-1.5 tracking-wider">기본 정보</p>
+                            <div class="bg-white border border-slate-200 rounded-lg p-2.5 text-[11px] space-y-1.5 shadow-sm flex-1 flex flex-col justify-center">
+                                <div class="flex justify-between"><span class="text-slate-400">공장</span><span class="font-medium text-slate-700">${factories}</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">사업</span><span class="font-medium text-slate-700">${projects}</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">원가항목</span><span class="font-medium text-slate-700">${costItems}</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">참여 팀</span><span class="font-medium text-blue-600">${merged.rows.length}개</span></div>
+                            </div>
+                        </div>
+                        <div class="col-span-2 flex flex-col">
+                            <p class="text-[10px] text-slate-400 font-bold uppercase mb-1.5 tracking-wider">성과(천원)</p>
+                            <div class="flex flex-col gap-1.5 flex-1">
+                                <div class="bg-white border border-slate-200 rounded-lg p-2.5 text-center shadow-sm flex-1 flex flex-col justify-center"><p class="text-[9px] text-slate-400 mb-0.5 font-bold">계획금액</p><p class="text-sm font-bold text-slate-800">${formatMoney(merged.planAmount)}</p></div>
+                                <div class="bg-blue-50 border border-blue-100 rounded-lg p-2.5 text-center shadow-sm flex-1 flex flex-col justify-center"><p class="text-[9px] text-blue-400 mb-0.5 font-bold">실적금액</p><p class="text-sm font-bold text-blue-700">${formatMoney(merged.actualAmount)}</p></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-lg p-2.5 shadow-sm">
+                        <div class="flex justify-between text-[11px] mb-1"><span class="text-slate-400">진척률</span><span class="font-bold ${pct >= 60 ? 'text-green-600' : pct > 0 ? 'text-orange-500' : 'text-slate-400'}">${pct.toFixed(1)}%</span></div>
+                        <div class="w-full bg-slate-100 rounded-full h-2"><div class="h-2 rounded-full ${pct >= 60 ? 'bg-green-500' : pct > 0 ? 'bg-orange-400' : 'bg-slate-200'}" style="width: ${Math.min(pct, 100)}%"></div></div>
+                    </div>
+                    <section>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase mb-1.5 tracking-wider">팀별 분해 내역</p>
+                        <div class="space-y-1.5">
+                            ${merged.rows.sort((a,b) => b.planAmount - a.planAmount).map(row => `
+                                <div class="bg-white border border-slate-200 rounded-lg p-2.5 shadow-sm">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="text-[11px] font-bold text-slate-700">${row.team}</span>
+                                        <span class="text-[10px] text-slate-400">${row.factory} / ${row.project}</span>
+                                    </div>
+                                    <div class="flex justify-between text-[11px]">
+                                        <span class="text-slate-400">담당: ${row.owner}</span>
+                                        <span><span class="text-slate-600">계획 ${formatMoney(row.planAmount)}</span> / <span class="text-blue-600 font-bold">실적 ${formatMoney(row.actualAmount)}</span></span>
+                                    </div>
+                                    ${row.activity ? '<p class="text-[10px] text-slate-500 mt-1 bg-slate-50 rounded p-1.5 leading-relaxed whitespace-pre-line">' + row.activity + '</p>' : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </section>
+                </div>
+            `;
+            panel.classList.remove('bg-slate-50'); panel.classList.add('bg-white');
+        }
+
+        function openDetailView(factoryName, taskId) { currentSubCategory = factoryName; switchView('factory'); setTimeout(() => { showTaskDetail(taskId); }, 100); }
+
+        function initMainCharts() { initFactoryChart(); initProjectChart(baseYear); initCostChart(baseYear); }
+
+        function initFactoryChart() {
+            const fd = yearlyChartData.factory || {};
+            const y0 = baseYear, y1 = baseYear-1, y2 = baseYear-2;
+            const factoryLabels = fd.labels || [];
+            const factoryData2 = fd[y2] || [];
+            const factoryData1 = fd[y1] || [];
+            const factoryData0Plan = fd[y0 + '_plan'] || [];
+            const factoryData0Actual = fd[y0] || [];
+            if(chartInstances.factory) chartInstances.factory.destroy();
+            chartInstances.factory = new Chart(document.getElementById('chart-factory'), {
+                type: 'bar',
+                data: { labels: factoryLabels, datasets: [
+                    { label: `${y2%100}년 실적`, data: factoryData2, backgroundColor: '#cbd5e1' },
+                    { label: `${y1%100}년 실적`, data: factoryData1, backgroundColor: '#3b82f6' },
+                    { label: `${y0%100}년 계획`, data: factoryData0Plan, backgroundColor: '#1e3a8a' },
+                    { label: `${y0%100}년 실적`, data: factoryData0Actual, backgroundColor: '#ef4444' }
+                ]},
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 8, font: { size: 11 }, padding: 5 } },
+                        datalabels: { anchor: 'end', align: 'top', formatter: (val) => (val/100000).toFixed(1), font: { weight: 'bold', size: 15 }, color: '#64748b' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, display: false },
+                        x: { grid: { display: false }, ticks: { font: { size: 11, weight: 'bold' } } }
+                    },
+                    layout: { padding: { top: 22 } }
+                }
+            });
+        }
+
+        function initProjectChart(year) {
+            const pd = yearlyChartData.project || {};
+            const y0 = baseYear, y1 = baseYear-1, y2 = baseYear-2;
+            const projLabels = pd.labels || [];
+            const projData2 = pd[y2] || [];
+            const projData1 = pd[y1] || [];
+            const projData0Plan = pd[y0 + '_plan'] || [];
+            const projData0Actual = pd[y0] || [];
+            if(chartInstances.project) chartInstances.project.destroy();
+            chartInstances.project = new Chart(document.getElementById('chart-project'), {
+                type: 'bar',
+                data: { labels: projLabels, datasets: [
+                    { label: `${y2%100}년 실적`, data: projData2, backgroundColor: '#cbd5e1' },
+                    { label: `${y1%100}년 실적`, data: projData1, backgroundColor: '#3b82f6' },
+                    { label: `${y0%100}년 계획`, data: projData0Plan, backgroundColor: '#1e3a8a' },
+                    { label: `${y0%100}년 실적`, data: projData0Actual, backgroundColor: '#ef4444' }
+                ]},
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 8, font: { size: 11 }, padding: 5 } },
+                        datalabels: { anchor: 'end', align: 'top', formatter: (val) => (val/100000).toFixed(1), font: { weight: 'bold', size: 15 }, color: '#64748b' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, display: false },
+                        x: { grid: { display: false }, ticks: { font: { size: 11, weight: 'bold' } } }
+                    },
+                    layout: { padding: { top: 22 } }
+                }
+            });
+        }
+
+        function initCostChart(year) {
+            const cd = yearlyChartData.cost || {};
+            const y0 = baseYear, y1 = baseYear-1, y2 = baseYear-2;
+            const costLabels = cd.labels || [];
+            const costData2 = cd[y2] || [];
+            const costData1 = cd[y1] || [];
+            const costData0Plan = cd[y0 + '_plan'] || [];
+            const costData0Actual = cd[y0] || [];
+            if(chartInstances.cost) chartInstances.cost.destroy();
+            chartInstances.cost = new Chart(document.getElementById('chart-cost'), {
+                type: 'bar',
+                data: { labels: costLabels, datasets: [
+                    { label: `${y2%100}년 실적`, data: costData2, backgroundColor: '#cbd5e1' },
+                    { label: `${y1%100}년 실적`, data: costData1, backgroundColor: '#3b82f6' },
+                    { label: `${y0%100}년 계획`, data: costData0Plan, backgroundColor: '#1e3a8a' },
+                    { label: `${y0%100}년 실적`, data: costData0Actual, backgroundColor: '#ef4444' }
+                ]},
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 8, font: { size: 11 }, padding: 5 } },
+                        datalabels: { anchor: 'end', align: 'top', formatter: (val) => (val/100000).toFixed(1), font: { weight: 'bold', size: 15 }, color: '#64748b' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, display: false },
+                        x: { grid: { display: false }, ticks: { font: { size: 11, weight: 'bold' } } }
+                    },
+                    layout: { padding: { top: 22 } }
+                }
+            });
+        }
+
+        // 엑셀 업로드 처리
+        function handleExcelUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+
+                const sheetName = workbook.SheetNames[0];
+                const sheet = workbook.Sheets[sheetName];
+                const rows = XLSX.utils.sheet_to_json(sheet);
+
+                if (!rows.length) { alert('엑셀에 데이터가 없습니다.'); return; }
+
+                const parsed = [];
+                rows.forEach((row, idx) => {
+                    const item = parseRowToData(row, idx + 1);
+                    if (item) parsed.push(item);
+                });
+
+                if (parsed.length === 0) { alert('유효한 데이터가 없습니다.'); return; }
+                allData = parsed;
+                // 기준연도 = 데이터 내 최대 연도
+                const years = [...new Set(parsed.map(d => d.year).filter(y => y > 0))];
+                if (years.length > 0) { baseYear = Math.max(...years); }
+
+                computeChartData();
+
+                const now = new Date();
+                const ts = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+                const headerP = document.getElementById('header-info');
+                if (headerP) headerP.textContent = `마지막 업데이트: ${ts} | 기준년도: ${baseYear}`;
+
+                alert(`${parsed.length}건의 데이터를 불러왔습니다.`);
+                renderView();
+            };
+            reader.readAsArrayBuffer(file);
+            event.target.value = '';
+        }
+
+        // 엑셀 날짜 처리 (문자열 또는 숫자 시리얼)
+        function formatExcelDate(val) {
+            if (!val) return '';
+            if (typeof val === 'number') {
+                const date = new Date((val - 25569) * 86400 * 1000);
+                return date.toISOString().split('T')[0];
+            }
+            return String(val).trim();
+        }
+
+        // 양식 다운로드
+        function downloadTemplate() {
+            const headers = ['대상연도', '법인', '팀', '대분류', '구분', '주요과제', '세부추진내용', '사업', '원가항목', '공장', '당해년도 계획금액(천원)', '담당자', '실적금액(천원) 1분기', '실적금액(천원) 2분기', '실적금액(천원) 3분기', '실적금액(천원) 4분기', '실적금액(천원) 합계', '진척률', '주요과제 활동실적', '비고'];
+            const headerKR = headers;
+            const sample = [
+                ['2026년', 'HCE', '생산기술팀', '생산성향상', '신규', 'PCB 국산화', 'PCB 메인 칩셋 국산화 대체', '전동', '재료비', '청도', 125000, '김철수', 0, 0, 0, 0, 0, '0%', '', '기여도: 청도 40%'],
+                ['2026년', 'HCE', '구매팀', '불량스크랩', '이월', '롤러 공정개선', '트랙 롤러 열처리 사이클 단축', '트랙', '가공비', '베트남', 98000, '이영희', 0, 0, 0, 0, 0, '0%', '', '']
+            ];
+
+            const wsData = [headerKR, ...sample];
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+            // 컬럼 너비 설정
+            ws['!cols'] = headers.map((h, i) => ({ wch: i === 6 ? 30 : i === 13 ? 30 : 14 }));
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'data');
+            XLSX.writeFile(wb, '수익성강화_양식.xlsx');
+        }
+
+        // CSV 파싱: 따옴표, 쉼표, 줄바꿈 모두 처리
+        function parseCSV(text) {
+            const rows = [];
+            let row = [];
+            let cell = '';
+            let inQuotes = false;
+            for (let i = 0; i < text.length; i++) {
+                const ch = text[i];
+                if (inQuotes) {
+                    if (ch === '"' && text[i+1] === '"') { cell += '"'; i++; }
+                    else if (ch === '"') { inQuotes = false; }
+                    else { cell += ch; }
+                } else {
+                    if (ch === '"') { inQuotes = true; }
+                    else if (ch === ',') { row.push(cell.trim()); cell = ''; }
+                    else if (ch === '\n' || (ch === '\r' && text[i+1] === '\n')) {
+                        if (ch === '\r') i++;
+                        row.push(cell.trim());
+                        if (row.length > 1 || row[0] !== '') rows.push(row);
+                        row = []; cell = '';
+                    } else { cell += ch; }
+                }
+            }
+            if (cell || row.length > 0) { row.push(cell.trim()); rows.push(row); }
+            return rows;
+        }
+
+        // "8,550천원" → 8550, "671천원" → 671
+        function parseMoneyValue(str) {
+            if (!str) return 0;
+            const cleaned = String(str).replace(/천원/g, '').replace(/,/g, '').trim();
+            return Number(cleaned) || 0;
+        }
+
+        // 한글 컬럼명 → 내부 필드 매핑
+        const COLUMN_MAP = {
+            // 2026_cost.xlsx 컬럼명
+            '대상연도': 'year',
+            '법인': 'factory',
+            '팀': 'team',
+            '대분류': 'category',
+            '구분': 'type',
+            '주요과제': 'mainTask',
+            '세부추진내용': 'content',
+            '사업': 'project',
+            '원가항목': 'costItem',
+            '공장': 'factory',
+            '당해년도 계획금액 (천원)': 'annualSaving',
+            '당해년도\n계획금액 (천원)': 'annualSaving',
+            '담당자': 'owner',
+            '실적금액(천원) 1분기': 'q1',
+            '실적금액(천원)\n1분기': 'q1',
+            '실적금액(천원) 2분기': 'q2',
+            '실적금액(천원)\n2분기': 'q2',
+            '실적금액(천원) 3분기': 'q3',
+            '실적금액(천원)\n3분기': 'q3',
+            '실적금액(천원) 4분기': 'q4',
+            '실적금액(천원)\n4분기': 'q4',
+            // 기존 CSV 컬럼명 (호환성)
+            '중분류': 'category',
+            '시작\n 예정일': 'startDate', '시작 예정일': 'startDate', '시작예정일': 'startDate',
+            '완료\n 예정일': 'finishDate', '완료 예정일': 'finishDate', '완료예정일': 'finishDate',
+            '2025년 예상\n 절감금액 (천원)': 'est2025', '2025년 예상 절감금액 (천원)': 'est2025', '2025예상(천원)': 'est2025',
+            '연간 절감금액\n (천원)': 'annualSaving', '연간 절감금액 (천원)': 'annualSaving', '계획금액(천원)': 'annualSaving',
+            '주요과제 활동실적': 'activity',
+            '비고': 'note'
+        };
+
+        function mapHeaders(rawHeaders) {
+            return rawHeaders.map(h => {
+                const clean = h.replace(/^\uFEFF/, '').replace(/\s+/g, ' ').trim();
+                // 정확히 매핑되면 사용
+                if (COLUMN_MAP[clean]) return COLUMN_MAP[clean];
+                // 부분 매칭
+                for (const [k, v] of Object.entries(COLUMN_MAP)) {
+                    if (clean.includes(k.replace(/\s+/g, '').substring(0, 4))) return v;
+                }
+                // 영문 헤더 그대로 (기존 양식 호환)
+                return clean;
+            });
+        }
+
+        // 차트 데이터를 동적 계산
+        function computeChartData() {
+            const y0 = baseYear;
+            const y1 = baseYear - 1;
+            const y2 = baseYear - 2;
+
+            // 기준연도 데이터 필터
+            mockData = allData.filter(d => d.year === y0);
+
+            // ── 3개년 공장별 차트 (allData에서 실제 연도별 집계) ──
+            const allFactories = [...new Set(allData.map(d => d.factory))].filter(f => f);
+            yearlyChartData.factory = { labels: allFactories };
+            [y2, y1, y0].forEach(yr => {
+                yearlyChartData.factory[yr] = allFactories.map(f =>
+                    allData.filter(d => d.year === yr && d.factory === f).reduce((a,c) => a + c.actualAmount, 0)
+                );
+            });
+            // 기준연도 계획금액 (별도 저장)
+            yearlyChartData.factory[y0 + '_plan'] = allFactories.map(f =>
+                allData.filter(d => d.year === y0 && d.factory === f).reduce((a,c) => a + c.planAmount, 0)
+            );
+
+            // ── 3개년 사업별 차트 (공장별과 동일 구조) ──
+            const projects = [...new Set(allData.map(d => d.project))].filter(p => p);
+            yearlyChartData.projectLabels = projects;
+            yearlyChartData.project = { labels: projects };
+            [y2, y1, y0].forEach(yr => {
+                yearlyChartData.project[yr] = projects.map(p =>
+                    allData.filter(d => d.year === yr && d.project === p).reduce((a,c) => a + c.actualAmount, 0)
+                );
+            });
+            yearlyChartData.project[y0 + '_plan'] = projects.map(p =>
+                allData.filter(d => d.year === y0 && d.project === p).reduce((a,c) => a + c.planAmount, 0)
+            );
+
+            // ── 3개년 원가항목별 차트 ──
+            const costItems = [...new Set(allData.map(d => d.costItem))].filter(c => c);
+            yearlyChartData.costLabels = costItems;
+            yearlyChartData.cost = { labels: costItems };
+            [y2, y1, y0].forEach(yr => {
+                yearlyChartData.cost[yr] = costItems.map(ci =>
+                    allData.filter(d => d.year === yr && d.costItem === ci).reduce((a,c) => a + c.actualAmount, 0)
+                );
+            });
+            yearlyChartData.cost[y0 + '_plan'] = costItems.map(ci =>
+                allData.filter(d => d.year === y0 && d.costItem === ci).reduce((a,c) => a + c.planAmount, 0)
+            );
+        }
+
+        // 엑셀 행 데이터를 mockData 형식으로 변환
+        function parseRowToData(row, idx) {
+            const obj = {};
+            // 한글 키를 내부 필드로 매핑
+            for (const [key, val] of Object.entries(row)) {
+                const cleanKey = key.replace(/^\uFEFF/, '').replace(/\s+/g, ' ').trim();
+                // 정확한 매칭 먼저
+                let mapped = COLUMN_MAP[cleanKey];
+                // 부분 매칭 (계획금액, 실적금액 등)
+                if (!mapped) {
+                    if (cleanKey.includes('계획금액')) mapped = 'annualSaving';
+                    else if (cleanKey.includes('1분기')) mapped = 'q1';
+                    else if (cleanKey.includes('2분기')) mapped = 'q2';
+                    else if (cleanKey.includes('3분기')) mapped = 'q3';
+                    else if (cleanKey.includes('4분기')) mapped = 'q4';
+                    else if (/^실적금액/.test(cleanKey) && !cleanKey.includes('분기')) mapped = 'totalActual';
+                    else if (cleanKey.includes('세부추진')) mapped = 'content';
+                    else if (cleanKey.includes('활동실적')) mapped = 'activity';
+                    else if (cleanKey.includes('주요과제')) mapped = 'mainTask';
+                }
+                if (mapped) obj[mapped] = val;
+                else obj[cleanKey] = val;
+            }
+
+            const planAmount = parseMoneyValue(obj.annualSaving || obj.planAmount); // 계획금액
+            // 실적금액: 합계 컬럼 우선, 없으면 분기 합산
+            const q1 = parseMoneyValue(obj.q1);
+            const q2 = parseMoneyValue(obj.q2);
+            const q3 = parseMoneyValue(obj.q3);
+            const q4 = parseMoneyValue(obj.q4);
+            const totalActual = parseMoneyValue(obj.totalActual);
+            const actualAmount = totalActual > 0 ? totalActual : (q1 + q2 + q3 + q4);
+            // 대상연도 파싱
+            const yearVal = obj.year ? parseInt(String(obj.year).replace(/[^0-9]/g, '')) : 0;
+
+            if (planAmount === 0 && actualAmount === 0 && !obj.content && !obj.mainTask) return null;
+
+            return {
+                id: idx,
+                year: yearVal,
+                factory: obj.factory || '',
+                project: obj.project || '',
+                costItem: obj.costItem || '',
+                category: obj.category || '',
+                subCategory: obj.category || '',
+                content: obj.content || obj.mainTask || '',
+                finishDate: obj.finishDate ? formatExcelDate(obj.finishDate) : '',
+                actualAmount: actualAmount,   // 실적금액
+                planAmount: planAmount,        // 계획금액
+                team: obj.team || '',
+                owner: obj.owner || '',
+                type: obj.type || '',
+                note: obj.note || '',
+                activity: obj.activity || ''
+            };
+        }
+
+        // data.js 파일 다운로드
+        function exportDataJS() {
+            if (!allData || allData.length === 0) { alert('내보낼 데이터가 없습니다.'); return; }
+            const now = new Date();
+            const ts = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+            let js = `// 자동 생성됨: ${ts}\n`;
+            js += `// 데이터: ${allData.length}건\n`;
+            js += `var BASE_YEAR = ${baseYear};\n`;
+            js += 'var externalData = ' + JSON.stringify(allData, null, 2) + ';\n';
+            const blob = new Blob([js], { type: 'text/javascript;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'data.js';
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        // 데이터 로딩 (data.js 최우선)
+        function loadData() {
+            if (typeof externalData !== 'undefined' && externalData.length > 0) {
+                allData = externalData;
+                if (typeof BASE_YEAR !== 'undefined') baseYear = BASE_YEAR;
+                computeChartData();
+                const headerP = document.getElementById('header-info');
+                if (headerP) headerP.textContent = `마지막 업데이트: ${new Date().toISOString().slice(0,16).replace('T',' ')} | 기준년도: ${baseYear}`;
+                console.log(`data.js에서 ${allData.length}건 로딩, 기준연도 ${baseYear}: ${mockData.length}건`);
+            }
+            renderView();
+        }
+
+        window.onload = () => { loadData(); }
+    </script>
+</body>
+</html>

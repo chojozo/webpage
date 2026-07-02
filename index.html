@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사업제안서: MINI FARM STUDIO (Full Version)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons Script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.min.js"></script>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            scroll-behavior: smooth;
+        }
+        .accent-bg { background-color: #166534; }
+        .accent-text { color: #166534; }
+        
+        /* Animation Classes */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Custom Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #166534;
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 0 2px rgba(0,0,0,0.2);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #d1d5db;
+            border-radius: 2px;
+        }
+        
+        /* Image Hover Effect */
+        .concept-image-container {
+            overflow: hidden;
+            border-radius: 1rem;
+        }
+        .concept-image {
+            transition: transform 0.7s ease;
+        }
+        .concept-image-container:hover .concept-image {
+            transform: scale(1.05);
+        }
+        
+        /* Print Styles */
+        @media print {
+            .no-print { display: none !important; }
+            .reveal { opacity: 1 !important; transform: none !important; }
+            body { background-color: white; }
+            .page-break { page-break-after: always; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Navigation Bar -->
+    <nav class="fixed top-0 left-0 w-full bg-white/90 backdrop-blur-md shadow-sm z-50 transition-all duration-300 no-print" id="navbar">
+        <div class="max-w-6xl mx-auto px-6 h-16 flex justify-between items-center">
+            <span class="font-black text-xl text-green-800 flex items-center gap-2">
+                <i data-lucide="sprout"></i> MINI FARM
+            </span>
+            <div class="hidden md:flex gap-6 text-sm font-bold text-gray-600">
+                <a href="#overview" class="hover:text-green-700 transition">개요</a>
+                <a href="#concept" class="hover:text-green-700 transition">컨셉</a>
+                <a href="#business-model" class="hover:text-green-700 transition">수익모델</a>
+                <a href="#simulator" class="hover:text-green-700 transition">시뮬레이션</a>
+                <a href="#benefits" class="hover:text-green-700 transition">기대효과</a>
+            </div>
+            <div class="w-8"></div>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <header class="relative min-h-screen flex items-center justify-center overflow-hidden bg-green-900 text-white pt-16">
+        <div class="absolute inset-0 opacity-10">
+            <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                        <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" stroke-width="1"/>
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)" />
+            </svg>
+        </div>
+        
+        <div class="relative z-10 text-center px-4 max-w-4xl mx-auto reveal active">
+            <span class="inline-block py-1 px-3 rounded-full bg-green-700 text-green-200 text-sm font-bold mb-6 animate-pulse">
+                PROJECT PROPOSAL
+            </span>
+            <h1 class="text-5xl md:text-7xl font-black leading-tight mb-8">
+                도심 속 공실을<br>
+                <span class="text-green-400">힐링 농장</span>으로 바꾸다
+            </h1>
+            <p class="text-xl text-green-100 mb-12 leading-relaxed max-w-2xl mx-auto">
+                부산대 상권의 새로운 랜드마크,<br>
+                <strong>MINI FARM STUDIO</strong>로 안정적인 수익과 가치를 제안합니다.
+            </p>
+            <div class="flex flex-col md:flex-row gap-4 justify-center">
+                <a href="#overview" class="bg-white text-green-900 px-8 py-4 rounded-xl font-bold text-lg hover:bg-green-50 transition shadow-xl transform hover:-translate-y-1">
+                    제안 내용 보기
+                </a>
+                <a href="#simulator" class="bg-green-700 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-green-600 transition shadow-xl border border-green-600 transform hover:-translate-y-1 flex items-center justify-center gap-2">
+                    <i data-lucide="calculator"></i> 수익 계산해보기
+                </a>
+            </div>
+        </div>
+        
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+            <i data-lucide="chevron-down" size="32" class="text-green-300"></i>
+        </div>
+    </header>
+
+    <div class="max-w-5xl mx-auto bg-white shadow-2xl min-h-screen -mt-10 rounded-t-3xl relative z-20 pb-20">
+        
+        <!-- 1. OVERVIEW -->
+        <section id="overview" class="p-8 md:p-16 border-b border-gray-100">
+            <div class="reveal">
+                <h2 class="text-3xl font-bold text-gray-800 mb-12 flex items-center gap-3">
+                    <span class="bg-green-100 p-2 rounded-lg text-green-700"><i data-lucide="target"></i></span>
+                    왜 스마트팜인가요?
+                </h2>
+                
+                <div class="grid md:grid-cols-2 gap-8 mb-12">
+                    <div class="bg-red-50 p-8 rounded-2xl border border-red-100 hover:shadow-lg transition duration-300">
+                        <h3 class="text-xl font-bold text-red-800 mb-4 flex items-center gap-2">
+                            <i data-lucide="alert-triangle"></i> 기존 시장의 문제
+                        </h3>
+                        <ul class="space-y-3 text-gray-700">
+                            <li class="flex items-start gap-2"><span class="text-red-500 mt-1">●</span> 기후 변화로 인한 노지 재배 한계</li>
+                            <li class="flex items-start gap-2"><span class="text-red-500 mt-1">●</span> 늘어나는 도심 상가 공실률</li>
+                            <li class="flex items-start gap-2"><span class="text-red-500 mt-1">●</span> 단순 요식업의 높은 폐업 리스크</li>
+                        </ul>
+                    </div>
+                    <div class="bg-green-50 p-8 rounded-2xl border border-green-100 hover:shadow-lg transition duration-300">
+                        <h3 class="text-xl font-bold text-green-800 mb-4 flex items-center gap-2">
+                            <i data-lucide="check-circle-2"></i> MINI FARM 솔루션
+                        </h3>
+                        <ul class="space-y-3 text-gray-700">
+                            <li class="flex items-start gap-2"><span class="text-green-500 mt-1">●</span> <strong>100% 실내 재배</strong>로 날씨 영향 없음</li>
+                            <li class="flex items-start gap-2"><span class="text-green-500 mt-1">●</span> 구독형 모델로 <strong>안정적 고정 수익</strong></li>
+                            <li class="flex items-start gap-2"><span class="text-green-500 mt-1">●</span> 체험/교육을 결합한 <strong>복합 문화 공간</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. CONCEPT & VISUAL -->
+        <section id="concept" class="p-8 md:p-16 bg-gray-50 border-b border-gray-200">
+            <div class="reveal">
+                <div class="text-center mb-12">
+                    <span class="text-green-600 font-bold tracking-widest text-sm uppercase">Space Concept</span>
+                    <h2 class="text-3xl md:text-4xl font-black text-gray-800 mt-2">
+                        도심 속 <span class="text-green-600">초록색 힐링 아지트</span>
+                    </h2>
+                </div>
+
+                <!-- Concept Image -->
+                <div class="relative concept-image-container shadow-2xl mb-12 group cursor-pointer border-4 border-white">
+                    <div class="absolute top-4 left-4 bg-green-900/80 backdrop-blur text-white text-xs font-bold px-4 py-2 rounded-full z-10">
+                        CONCEPT VIEW
+                    </div>
+                    <img 
+                        src="https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?q=80&w=1200&auto=format&fit=crop" 
+                        alt="Smart Farm Interior Concept" 
+                        class="w-full h-96 md:h-[500px] object-cover concept-image"
+                    >
+                    <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent p-8 pt-24 text-white">
+                        <p class="font-bold text-xl mb-1">Modern Urban Farm</p>
+                        <p class="text-sm opacity-90">식물 생장 LED와 모던한 인테리어가 어우러진 힐링 공간</p>
+                    </div>
+                </div>
+
+                <!-- Target Analysis -->
+                <div class="grid md:grid-cols-2 gap-8 mb-12">
+                    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+                        <h3 class="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2"><i data-lucide="users" class="text-green-600"></i> 타겟 고객 분석</h3>
+                        <div class="space-y-4">
+                            <div class="p-3 bg-gray-50 rounded-lg">
+                                <span class="font-bold text-gray-800 block">대학생/자취생</span>
+                                <span class="text-sm text-gray-600">#플랜테리어 #힐링 #인스타그래머블</span>
+                            </div>
+                            <div class="p-3 bg-gray-50 rounded-lg">
+                                <span class="font-bold text-gray-800 block">가족 단위</span>
+                                <span class="text-sm text-gray-600">#자연교육 #체험학습 #주말나들이</span>
+                            </div>
+                            <div class="p-3 bg-gray-50 rounded-lg">
+                                <span class="font-bold text-gray-800 block">인근 카페/식당</span>
+                                <span class="text-sm text-gray-600">#허브공급 #B2B #신선재료</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Operating Scenario (New) -->
+                    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+                        <h3 class="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2"><i data-lucide="activity" class="text-green-600"></i> 운영 시나리오</h3>
+                        <div class="space-y-4 relative">
+                            <div class="absolute left-3 top-2 bottom-2 w-0.5 bg-gray-200"></div>
+                            
+                            <div class="relative pl-8">
+                                <div class="absolute left-0 top-1 w-6 h-6 bg-green-100 rounded-full flex items-center justify-center text-green-600 text-xs font-bold">1</div>
+                                <span class="font-bold text-gray-800 text-sm">방문 및 관리</span>
+                                <p class="text-xs text-gray-500 mt-1">주 1~3회 방문, 앱으로 생육 상태 확인</p>
+                            </div>
+                            <div class="relative pl-8">
+                                <div class="absolute left-0 top-1 w-6 h-6 bg-green-100 rounded-full flex items-center justify-center text-green-600 text-xs font-bold">2</div>
+                                <span class="font-bold text-gray-800 text-sm">커뮤니티 활동</span>
+                                <p class="text-xs text-gray-500 mt-1">라운지에서 정보 공유, 작물 나눔</p>
+                            </div>
+                            <div class="relative pl-8">
+                                <div class="absolute left-0 top-1 w-6 h-6 bg-green-100 rounded-full flex items-center justify-center text-green-600 text-xs font-bold">3</div>
+                                <span class="font-bold text-gray-800 text-sm">수확 및 가공</span>
+                                <p class="text-xs text-gray-500 mt-1">직접 수확한 채소로 요리 클래스 참여</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. BUSINESS MODEL (NEW/RESTORED) -->
+        <section id="business-model" class="p-8 md:p-16 border-b border-gray-100">
+            <div class="reveal">
+                <h2 class="text-3xl font-bold text-gray-800 mb-12 flex items-center gap-3">
+                    <span class="bg-green-100 p-2 rounded-lg text-green-700"><i data-lucide="pie-chart"></i></span>
+                    비즈니스 수익 모델
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Model 1 -->
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition group">
+                        <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition">
+                            <i data-lucide="calendar-check"></i>
+                        </div>
+                        <h4 class="font-bold text-lg mb-2">스마트팜 구독</h4>
+                        <p class="text-sm text-gray-600">월간/연간 단위 개인 랙(Rack) 임대 및 관리비 수익</p>
+                    </div>
+                    <!-- Model 2 -->
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition group">
+                        <div class="w-10 h-10 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center mb-4 group-hover:bg-orange-600 group-hover:text-white transition">
+                            <i data-lucide="shopping-bag"></i>
+                        </div>
+                        <h4 class="font-bold text-lg mb-2">소모품 판매</h4>
+                        <p class="text-sm text-gray-600">모종, 전용 양액, 영양제, 재배 키트 등 필수품 판매</p>
+                    </div>
+                    <!-- Model 3 -->
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition group">
+                        <div class="w-10 h-10 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center mb-4 group-hover:bg-purple-600 group-hover:text-white transition">
+                            <i data-lucide="heart-handshake"></i>
+                        </div>
+                        <h4 class="font-bold text-lg mb-2">케어 서비스</h4>
+                        <p class="text-sm text-gray-600">전문가 관리 대행, 원격 모니터링 프리미엄 옵션</p>
+                    </div>
+                    <!-- Model 4 -->
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition group">
+                        <div class="w-10 h-10 bg-teal-50 text-teal-600 rounded-lg flex items-center justify-center mb-4 group-hover:bg-teal-600 group-hover:text-white transition">
+                            <i data-lucide="graduation-cap"></i>
+                        </div>
+                        <h4 class="font-bold text-lg mb-2">클래스/체험</h4>
+                        <p class="text-sm text-gray-600">원데이 클래스, 어린이 자연 체험, 쿠킹 클래스 운영</p>
+                    </div>
+                    <!-- Model 5 -->
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition group">
+                        <div class="w-10 h-10 bg-red-50 text-red-600 rounded-lg flex items-center justify-center mb-4 group-hover:bg-red-600 group-hover:text-white transition">
+                            <i data-lucide="store"></i>
+                        </div>
+                        <h4 class="font-bold text-lg mb-2">작물 판매 연계</h4>
+                        <p class="text-sm text-gray-600">인근 식당/카페에 신선 작물 공급 매칭 및 수수료</p>
+                    </div>
+                    <!-- Model 6 -->
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition group">
+                        <div class="w-10 h-10 bg-gray-50 text-gray-600 rounded-lg flex items-center justify-center mb-4 group-hover:bg-gray-600 group-hover:text-white transition">
+                            <i data-lucide="trending-up"></i>
+                        </div>
+                        <h4 class="font-bold text-lg mb-2">향후 확장</h4>
+                        <p class="text-sm text-gray-600">프랜차이즈 가맹, 가정용 기기 판매, 통합 앱 서비스</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. REVENUE SIMULATOR -->
+        <section id="simulator" class="p-8 md:p-16 bg-green-900 text-white relative overflow-hidden">
+            <!-- Decorative blobs -->
+            <div class="absolute top-0 right-0 w-64 h-64 bg-green-800 rounded-full filter blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2"></div>
+            <div class="absolute bottom-0 left-0 w-64 h-64 bg-green-800 rounded-full filter blur-3xl opacity-50 translate-y-1/2 -translate-x-1/2"></div>
+
+            <div class="reveal relative z-10">
+                <h2 class="text-3xl font-bold mb-2 flex items-center gap-2">
+                    <i data-lucide="calculator" class="text-green-400"></i> 수익 시뮬레이션
+                </h2>
+                <p class="text-green-200 mb-10">설치할 스마트팜 장비 대수와 구독료를 조절하여 예상 수익을 확인해보세요.</p>
+
+                <div class="grid md:grid-cols-2 gap-12">
+                    <!-- Controls -->
+                    <div class="space-y-8 bg-green-800/50 p-6 rounded-2xl border border-green-700 backdrop-blur-sm">
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <label class="font-bold text-green-100">운영 장비(Rack) 수</label>
+                                <span class="font-bold text-green-300" id="rack-val">20대</span>
+                            </div>
+                            <input type="range" id="rack-input" min="5" max="50" value="20" step="1" oninput="calculateRevenue()">
+                            <p class="text-xs text-green-400 mt-2">* 1대당 약 0.5평 소요 (통로 포함)</p>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <label class="font-bold text-green-100">월 구독료 (1구좌)</label>
+                                <span class="font-bold text-green-300" id="price-val">150,000원</span>
+                            </div>
+                            <input type="range" id="price-input" min="50000" max="300000" value="150000" step="10000" oninput="calculateRevenue()">
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <label class="font-bold text-green-100">부가 수익률 (교육/판매 등)</label>
+                                <span class="font-bold text-green-300" id="extra-val">20%</span>
+                            </div>
+                            <input type="range" id="extra-input" min="0" max="50" value="20" step="5" oninput="calculateRevenue()">
+                            <p class="text-xs text-green-400 mt-2">* 체험 클래스, 모종/비료 판매, 카페 수익 등</p>
+                        </div>
+                    </div>
+
+                    <!-- Result Display -->
+                    <div class="flex flex-col justify-center bg-white text-gray-900 p-8 rounded-2xl shadow-2xl transform transition-transform duration-300 hover:scale-105">
+                        <h3 class="text-gray-500 font-bold mb-2 text-sm uppercase tracking-wide">예상 월 매출액</h3>
+                        <div class="text-5xl font-black text-green-700 mb-2 tracking-tight" id="total-revenue">0원</div>
+                        <div class="h-px bg-gray-200 w-full my-6"></div>
+                        <div class="space-y-3">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">기본 구독 수익</span>
+                                <span class="font-bold" id="base-revenue">0원</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">부가 수익 (+)</span>
+                                <span class="font-bold text-green-600" id="add-revenue">0원</span>
+                            </div>
+                        </div>
+                        <div class="mt-8 bg-green-50 p-4 rounded-xl text-center">
+                            <span class="block text-green-800 font-bold text-sm mb-1">예상 연 수익</span>
+                            <span class="block text-2xl font-black text-green-700" id="annual-revenue">0원</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. BUILDING OWNER BENEFITS (NEW/RESTORED) -->
+        <section id="benefits" class="p-8 md:p-16 bg-gray-900 text-white">
+            <div class="reveal">
+                <h2 class="text-3xl font-bold mb-12 flex items-center gap-3">
+                    <span class="bg-green-600 p-2 rounded-lg text-white"><i data-lucide="building"></i></span>
+                    건물주 제공 가치 (Benefits)
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="flex gap-4 p-4 border border-gray-700 rounded-xl hover:bg-gray-800 transition">
+                        <div class="mt-1 text-green-400"><i data-lucide="shield-check" size="32"></i></div>
+                        <div>
+                            <h4 class="text-xl font-bold mb-2 text-green-300">장기 안정 임대 수익</h4>
+                            <p class="text-gray-400 leading-relaxed">계절/날씨 영향 없는 실내 재배로 비수기가 없으며, 1~3년 장기 계약이 가능하여 공실 리스크를 최소화합니다.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 p-4 border border-gray-700 rounded-xl hover:bg-gray-800 transition">
+                        <div class="mt-1 text-green-400"><i data-lucide="leaf" size="32"></i></div>
+                        <div>
+                            <h4 class="text-xl font-bold mb-2 text-green-300">건물 가치 상승 (Value Up)</h4>
+                            <p class="text-gray-400 leading-relaxed">죽어있는 공실이 '초록색 힐링 공간'으로 변모합니다. 낡은 이미지를 벗고 친환경/스마트 건물로 브랜딩됩니다.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 p-4 border border-gray-700 rounded-xl hover:bg-gray-800 transition">
+                        <div class="mt-1 text-green-400"><i data-lucide="users" size="32"></i></div>
+                        <div>
+                            <h4 class="text-xl font-bold mb-2 text-green-300">유동인구 증가</h4>
+                            <p class="text-gray-400 leading-relaxed">단순 방문이 아닌 정기적 방문객(관리/체험)이 발생하여 건물 내 카페, 편의점 등 타 매장 매출에도 기여합니다.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 p-4 border border-gray-700 rounded-xl hover:bg-gray-800 transition">
+                        <div class="mt-1 text-green-400"><i data-lucide="award" size="32"></i></div>
+                        <div>
+                            <h4 class="text-xl font-bold mb-2 text-green-300">민원 없는 깨끗한 업종</h4>
+                            <p class="text-gray-400 leading-relaxed">소음, 냄새, 야간 소란이 전혀 없습니다. 다른 임차인들과의 마찰 없이 쾌적한 건물 관리가 가능합니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. VISION -->
+        <section id="vision" class="p-8 md:p-16 border-b border-gray-100">
+            <div class="reveal">
+                <h2 class="text-3xl font-bold text-gray-800 mb-8">장기 성장 로드맵</h2>
+                <div class="relative">
+                    <div class="hidden md:block absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 transform -translate-y-1/2 rounded-full"></div>
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:border-green-500 hover:shadow-md transition text-center group">
+                            <div class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 font-bold group-hover:bg-green-600 group-hover:text-white transition">1</div>
+                            <h4 class="font-bold mb-2">오픈 & 안정화</h4>
+                            <p class="text-xs text-gray-500">회원 모집 및<br>커뮤니티 형성</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:border-green-500 hover:shadow-md transition text-center group">
+                            <div class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 font-bold group-hover:bg-green-600 group-hover:text-white transition">2</div>
+                            <h4 class="font-bold mb-2">프로그램 확장</h4>
+                            <p class="text-xs text-gray-500">어린이 체험 및<br>쿠킹 클래스 런칭</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:border-green-500 hover:shadow-md transition text-center group">
+                            <div class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 font-bold group-hover:bg-green-600 group-hover:text-white transition">3</div>
+                            <h4 class="font-bold mb-2">B2B 공급</h4>
+                            <p class="text-xs text-gray-500">인근 카페/식당<br>정기 납품 계약</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:border-green-500 hover:shadow-md transition text-center group">
+                            <div class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 font-bold group-hover:bg-green-600 group-hover:text-white transition">4</div>
+                            <h4 class="font-bold mb-2">프랜차이즈</h4>
+                            <p class="text-xs text-gray-500">운영 매뉴얼화 및<br>2호점 확장</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:border-green-500 hover:shadow-md transition text-center group">
+                            <div class="w-10 h-10 bg-gray-100 text-gray-600 rounded-full flex items-center justify-center mx-auto mb-4 font-bold group-hover:bg-gray-800 group-hover:text-white transition">5</div>
+                            <h4 class="font-bold mb-2">플랫폼화</h4>
+                            <p class="text-xs text-gray-500">가정용 기기 판매<br>& 통합 앱 운영</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Footer -->
+        <footer class="bg-gray-900 text-white rounded-b-xl p-12 text-center">
+            <h2 class="text-3xl font-bold mb-6">공실을 가치있는 공간으로 바꿀 기회</h2>
+            <p class="text-gray-400 mb-8 max-w-xl mx-auto">
+                MINI FARM STUDIO는 단순한 임대가 아닌,<br>
+                건물의 가치를 높이는 파트너가 되겠습니다.
+            </p>
+            <div class="flex justify-center gap-4">
+                <button class="bg-green-600 hover:bg-green-500 text-white px-8 py-4 rounded-xl font-bold transition flex items-center gap-2">
+                    <i data-lucide="phone"></i> 010-XXXX-XXXX 문의하기
+                </button>
+            </div>
+            <p class="text-gray-600 text-sm mt-12">
+                © 202X MINI FARM STUDIO Proposal. All rights reserved.
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // 1. Icon Initialization
+        function initIcons() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+        if (typeof lucide !== 'undefined') {
+            initIcons();
+        } else {
+            window.addEventListener('load', initIcons);
+        }
+
+        // 2. Scroll Animation
+        const revealElements = document.querySelectorAll('.reveal');
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, { threshold: 0.1 });
+        revealElements.forEach(el => revealObserver.observe(el));
+
+        // 3. Revenue Simulator Logic
+        function formatMoney(amount) {
+            return new Intl.NumberFormat('ko-KR').format(amount) + '원';
+        }
+
+        function calculateRevenue() {
+            const rackCount = parseInt(document.getElementById('rack-input').value);
+            const pricePerRack = parseInt(document.getElementById('price-input').value);
+            const extraRate = parseInt(document.getElementById('extra-input').value) / 100;
+
+            document.getElementById('rack-val').innerText = rackCount + "대";
+            document.getElementById('price-val').innerText = formatMoney(pricePerRack);
+            document.getElementById('extra-val').innerText = (extraRate * 100) + "%";
+
+            const baseRevenue = rackCount * pricePerRack;
+            const extraRevenue = baseRevenue * extraRate;
+            const totalMonthly = baseRevenue + extraRevenue;
+            const totalAnnual = totalMonthly * 12;
+
+            document.getElementById('base-revenue').innerText = formatMoney(baseRevenue);
+            document.getElementById('add-revenue').innerText = "+ " + formatMoney(extraRevenue);
+            document.getElementById('total-revenue').innerText = formatMoney(totalMonthly);
+            document.getElementById('annual-revenue').innerText = formatMoney(totalAnnual);
+        }
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                nav.classList.add('shadow-md');
+                nav.classList.replace('bg-white/90', 'bg-white/95');
+            } else {
+                nav.classList.remove('shadow-md');
+                nav.classList.replace('bg-white/95', 'bg-white/90');
+            }
+        });
+
+        // Initial Calculation
+        calculateRevenue();
+    </script>
+</body>
+</html>
