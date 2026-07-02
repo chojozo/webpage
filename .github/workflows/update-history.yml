@@ -1,0 +1,51 @@
+name: Update AFL history diagram
+
+on:
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: "URL path under GitHub Pages, for example afl"
+        required: true
+        default: "afl"
+      notion_database_id:
+        description: "Notion database id or URL. Empty uses NOTION_DATABASE_ID secret or the AFL default."
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Build diagram
+        run: |
+          python scripts/build_history.py \
+            --source-type notion \
+            --notion-database-id "${{ inputs.notion_database_id }}" \
+            --output "docs/${{ inputs.slug }}/index.html" \
+            --limit 12
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+          NOTION_DATE_PROPERTY: ${{ secrets.NOTION_DATE_PROPERTY }}
+          NOTION_TITLE_PROPERTY: ${{ secrets.NOTION_TITLE_PROPERTY }}
+          NOTION_DESCRIPTION_PROPERTY: ${{ secrets.NOTION_DESCRIPTION_PROPERTY }}
+          AFL_LLM_BASE_URL: ${{ secrets.AFL_LLM_BASE_URL }}
+          AFL_LLM_API_KEY: ${{ secrets.AFL_LLM_API_KEY }}
+          AFL_LLM_MODEL: ${{ secrets.AFL_LLM_MODEL }}
+
+      - name: Commit updated diagram
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update ${{ inputs.slug }} history diagram"
+          file_pattern: docs/**/index.html
