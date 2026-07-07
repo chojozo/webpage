@@ -79,6 +79,12 @@ PREFERRED_TITLES = [
 ]
 
 
+PREFERRED_TITLES_10 = [
+    PREFERRED_TITLES[index]
+    for index in (0, 1, 2, 4, 5, 7, 8, 9, 10, 11)
+]
+
+
 FALLBACK_SUMMARIES = {
     "포크리프트 AGV의 연구개발 필요성": "창고 적재 AGV 활용 기대",
     "포크리프트 AGV Feasibility 개발": "예일 스테커 개조, 자체 2D SLAM 적용",
@@ -346,7 +352,8 @@ def select_milestones(items: list[HistoryItem], limit: int) -> list[HistoryItem]
     if len(items) <= limit:
         return items
 
-    preferred = [item for title in PREFERRED_TITLES for item in items if item.title == title]
+    preferred_titles = PREFERRED_TITLES_10 if limit == 10 else PREFERRED_TITLES
+    preferred = [item for title in preferred_titles for item in items if item.title == title]
     if len(preferred) >= limit:
         return sorted(preferred[:limit], key=lambda item: item.sort_key)
 
@@ -933,18 +940,46 @@ def render_html(source: Path, items: list[HistoryItem], milestones: list[Milesto
 """
 
 
-BRANCH_ICONS = [
-    """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 8h14M6 16h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/></svg>""",
-    """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17h16M7 17V9h4v8M13 17V5h4v12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
-    """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19h12M8 19V7h8v12M10 10h4M10 14h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
-    """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17h10M8 17l1-9h6l1 9M9 8l3-4 3 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
-    """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15h16M7 15v4M17 15v4M9 15l3-8 3 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
-    """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5v14M7 7l10 10M17 7 7 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>""",
-]
+BRANCH_ICONS = {
+    "need": """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 8h14M6 16h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/></svg>""",
+    "build": """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17h10M8 17l1-9h6l1 9M9 8l3-4 3 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
+    "sales": """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17h16M7 17V9h4v8M13 17V5h4v12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
+    "elements": """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5v14M7 7l10 10M17 7 7 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>""",
+    "slam": """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 17l7-10 7 10M8 13h8M12 7v10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
+    "roadmap": """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 17c4-6 10-6 14-10M6 7h5v5H6zM13 14h5v5h-5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
+    "plan": """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v16H7zM10 8h4M10 12h4M10 16h2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
+    "kickoff": """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17h10M8 17l1-9h6l1 9M12 8V4M9 7l3-3 3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
+    "master": """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h12v12H6zM9 9h6v6H9zM4 10h2M4 14h2M18 10h2M18 14h2M10 4v2M14 4v2M10 18v2M14 18v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
+    "assembly": """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8l6-3 6 3v8l-6 3-6-3zM6 8l6 3 6-3M12 11v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
+}
 
 
-def render_branch_rows(milestones: list[Milestone]) -> str:
-    colors = ["#6f7d94", "#77c9c9", "#f3bf2e", "#ee6d59", "#86c9a3", "#6f9fd8"]
+def branch_icon_for(item: Milestone) -> str:
+    text = f"{item.title} {item.summary}".lower()
+    rules = [
+        ("assembly", ("조립", "모델 조립", "자체 모델")),
+        ("master", ("마스터플랜", "master")),
+        ("kickoff", ("kick-off", "kickoff", "킥오프")),
+        ("plan", ("추진계획", "계획")),
+        ("roadmap", ("로드맵", "버전", "v1.5", "v3.0")),
+        ("slam", ("slam", "이식")),
+        ("elements", ("요소", "정의", "3d 핵심")),
+        ("sales", ("매출", "pjt", "프로젝트")),
+        ("build", ("feasibility", "개발")),
+        ("need", ("필요", "필요성")),
+    ]
+    for icon_key, keywords in rules:
+        if any(keyword in text for keyword in keywords):
+            return BRANCH_ICONS[icon_key]
+    return BRANCH_ICONS["need"]
+
+
+def render_branch_rows(milestones: list[Milestone], clean: bool = False) -> str:
+    colors = (
+        ["#334155", "#0f766e", "#2563eb", "#7c3aed", "#0e7490"]
+        if clean
+        else ["#6f7d94", "#77c9c9", "#f3bf2e", "#ee6d59", "#86c9a3", "#6f9fd8"]
+    )
     segments = []
     nodes = []
     for index, item in enumerate(milestones):
@@ -963,7 +998,7 @@ def render_branch_rows(milestones: list[Milestone]) -> str:
             </div>
             <div class="branch-date">{html.escape(item.raw_date)}</div>
             <div class="branch-stem" aria-hidden="true"></div>
-            <div class="branch-icon" aria-hidden="true">{BRANCH_ICONS[index % len(BRANCH_ICONS)]}</div>
+            <div class="branch-icon" aria-hidden="true">{branch_icon_for(item)}</div>
             <div class="branch-dot" aria-hidden="true"></div>
           </article>"""
         )
@@ -979,8 +1014,30 @@ def render_branch_rows(milestones: list[Milestone]) -> str:
       </div>"""
 
 
-def render_branch_html(source: Path, items: list[HistoryItem], milestones: list[Milestone], used_llm: bool) -> str:
-    branch_rows = render_branch_rows(milestones)
+def render_branch_html(source: Path, items: list[HistoryItem], milestones: list[Milestone], used_llm: bool, clean: bool = False) -> str:
+    branch_rows = render_branch_rows(milestones, clean=clean)
+    aspect_ratio = "16 / 3.2" if clean else "16 / 4"
+    body_background = "#f8fafc" if clean else "radial-gradient(circle at 12% 24%, rgba(255,255,255,0.54), transparent 24%), linear-gradient(135deg, #fbf3e6, #efe4d4)"
+    paper = "#ffffff" if clean else "#f5ecdf"
+    line = "rgba(15, 23, 42, 0.08)" if clean else "rgba(93, 111, 126, 0.16)"
+    shadow = "0 18px 45px rgba(15, 23, 42, 0.10)" if clean else "0 22px 60px rgba(82, 67, 48, 0.13)"
+    board_background = "#ffffff" if clean else "linear-gradient(90deg, var(--line) 1px, transparent 1px), linear-gradient(180deg, rgba(93,111,126,0.08) 1px, transparent 1px)"
+    board_padding = "18px 28px 18px" if clean else "28px 32px 24px"
+    axis_height = "20px" if clean else "24px"
+    date_size = "14px" if clean else "17px"
+    top_date = "calc(50% + 22px)" if clean else "calc(50% + 25px)"
+    bottom_date = "calc(50% - 37px)" if clean else "calc(50% - 47px)"
+    copy_width = "min(174px, calc(100% + 58px))" if clean else "min(164px, calc(100% + 64px))"
+    copy_h2_size = "13px" if clean else "14px"
+    copy_p_size = "10.5px" if clean else "10.2px"
+    copy_p_color = "rgba(30, 41, 59, 0.74)" if clean else "rgba(54, 65, 66, 0.68)"
+    icon_size = "44px" if clean else "52px"
+    icon_inset = "6px" if clean else "7px"
+    icon_svg_size = "22px" if clean else "26px"
+    top_icon = "57px" if clean else "78px"
+    bottom_icon = "57px" if clean else "78px"
+    stem_offset = "101px" if clean else "130px"
+    dot_size = "7px" if clean else "8px"
 
     return f"""<!doctype html>
 <html lang="ko">
@@ -995,9 +1052,9 @@ def render_branch_html(source: Path, items: list[HistoryItem], milestones: list[
       color-scheme: light;
       --ink: #334052;
       --muted: #8d968f;
-      --paper: #f5ecdf;
-      --line: rgba(93, 111, 126, 0.16);
-      --shadow: 0 22px 60px rgba(82, 67, 48, 0.13);
+      --paper: {paper};
+      --line: {line};
+      --shadow: {shadow};
     }}
 
     * {{ box-sizing: border-box; }}
@@ -1014,15 +1071,13 @@ def render_branch_html(source: Path, items: list[HistoryItem], milestones: list[
       place-items: center;
       font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
       color: var(--ink);
-      background:
-        radial-gradient(circle at 12% 24%, rgba(255,255,255,0.54), transparent 24%),
-        linear-gradient(135deg, #fbf3e6, #efe4d4);
+      background: {body_background};
       line-height: 1.32;
     }}
 
     main {{
       width: min(100vw, 1280px);
-      aspect-ratio: 16 / 4;
+      aspect-ratio: {aspect_ratio};
       margin: 0;
       padding: 0;
     }}
@@ -1031,7 +1086,7 @@ def render_branch_html(source: Path, items: list[HistoryItem], milestones: list[
       width: 100%;
       height: 100%;
       overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(226, 232, 240, 0.9);
       background:
         linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0)),
         var(--paper);
@@ -1042,10 +1097,8 @@ def render_branch_html(source: Path, items: list[HistoryItem], milestones: list[
       position: relative;
       width: 100%;
       height: 100%;
-      padding: 28px 32px 24px;
-      background:
-        linear-gradient(90deg, var(--line) 1px, transparent 1px),
-        linear-gradient(180deg, rgba(93,111,126,0.08) 1px, transparent 1px);
+      padding: {board_padding};
+      background: {board_background};
       background-size: 72px 72px;
     }}
 
@@ -1056,7 +1109,7 @@ def render_branch_html(source: Path, items: list[HistoryItem], milestones: list[
       top: 50%;
       display: grid;
       grid-template-columns: repeat(var(--count), minmax(0, 1fr));
-      height: 24px;
+      height: {axis_height};
       transform: translateY(-50%);
       z-index: 2;
     }}
@@ -1087,7 +1140,7 @@ def render_branch_html(source: Path, items: list[HistoryItem], milestones: list[
       display: block;
       padding: 0 4px;
       color: var(--accent);
-      font-size: 17px;
+      font-size: {date_size};
       line-height: 1;
       font-weight: 950;
       letter-spacing: 0;
@@ -1098,11 +1151,11 @@ def render_branch_html(source: Path, items: list[HistoryItem], milestones: list[
     }}
 
     .bottom .branch-date {{
-      top: calc(50% - 47px);
+      top: {bottom_date};
     }}
 
     .top .branch-date {{
-      top: calc(50% + 25px);
+      top: {top_date};
     }}
 
     .branch-items {{
@@ -1128,7 +1181,7 @@ def render_branch_html(source: Path, items: list[HistoryItem], milestones: list[
     .branch-copy {{
       position: absolute;
       left: 50%;
-      width: min(164px, calc(100% + 64px));
+      width: {copy_width};
       transform: translateX(-50%);
       color: #51605d;
     }}
@@ -1139,7 +1192,7 @@ def render_branch_html(source: Path, items: list[HistoryItem], milestones: list[
     .branch-copy h2 {{
       margin: 0 0 6px;
       color: var(--accent);
-      font-size: 14px;
+      font-size: {copy_h2_size};
       line-height: 1.14;
       font-weight: 950;
       letter-spacing: 0;
@@ -1148,8 +1201,8 @@ def render_branch_html(source: Path, items: list[HistoryItem], milestones: list[
 
     .branch-copy p {{
       margin: 0;
-      color: rgba(54, 65, 66, 0.68);
-      font-size: 10.2px;
+      color: {copy_p_color};
+      font-size: {copy_p_size};
       line-height: 1.3;
       font-weight: 760;
       word-break: keep-all;
@@ -1160,25 +1213,25 @@ def render_branch_html(source: Path, items: list[HistoryItem], milestones: list[
       left: 50%;
       display: grid;
       place-items: center;
-      width: 52px;
-      height: 52px;
+      width: {icon_size};
+      height: {icon_size};
       border-radius: 50%;
       background: color-mix(in srgb, var(--accent), white 16%);
       color: #fff;
       box-shadow:
-        inset 0 0 0 7px rgba(255,255,255,0.28),
+        inset 0 0 0 {icon_inset} rgba(255,255,255,0.25),
         0 12px 22px rgba(80, 68, 48, 0.14);
       transform: translateX(-50%);
     }}
 
     .branch-icon svg {{
-      width: 26px;
-      height: 26px;
+      width: {icon_svg_size};
+      height: {icon_svg_size};
       display: block;
     }}
 
-    .top .branch-icon {{ top: 78px; }}
-    .bottom .branch-icon {{ bottom: 78px; }}
+    .top .branch-icon {{ top: {top_icon}; }}
+    .bottom .branch-icon {{ bottom: {bottom_icon}; }}
 
     .branch-stem {{
       position: absolute;
@@ -1189,15 +1242,15 @@ def render_branch_html(source: Path, items: list[HistoryItem], milestones: list[
       opacity: 0.72;
     }}
 
-    .top .branch-stem {{ top: 130px; height: calc(50% - 130px); }}
-    .bottom .branch-stem {{ bottom: 130px; height: calc(50% - 130px); }}
+    .top .branch-stem {{ top: {stem_offset}; height: calc(50% - {stem_offset}); }}
+    .bottom .branch-stem {{ bottom: {stem_offset}; height: calc(50% - {stem_offset}); }}
 
     .branch-dot {{
       position: absolute;
       left: 50%;
       top: 50%;
-      width: 8px;
-      height: 8px;
+      width: {dot_size};
+      height: {dot_size};
       border: 2px solid rgba(255,255,255,0.8);
       border-radius: 50%;
       background: #fff;
@@ -1271,7 +1324,7 @@ def main() -> None:
     parser.add_argument("--source-type", choices=("auto", "file", "notion"), default="auto")
     parser.add_argument("--notion-database-id", default=None)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
-    parser.add_argument("--style", choices=("classic", "branch"), default="classic")
+    parser.add_argument("--style", choices=("classic", "branch", "branch-clean"), default="classic")
     parser.add_argument("--limit", type=int, default=12)
     parser.add_argument("--no-llm", action="store_true", help="Do not call the configured internal LLM.")
     args = parser.parse_args()
@@ -1286,8 +1339,13 @@ def main() -> None:
     llm_milestones = None if args.no_llm else ask_llm_for_milestones(selected, args.limit)
     milestones = llm_milestones or fallback_milestones(selected)
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    renderer = render_branch_html if args.style == "branch" else render_html
-    args.output.write_text(renderer(args.source, items, milestones, used_llm=bool(llm_milestones)), encoding="utf-8")
+    if args.style == "branch-clean":
+        rendered = render_branch_html(args.source, items, milestones, used_llm=bool(llm_milestones), clean=True)
+    elif args.style == "branch":
+        rendered = render_branch_html(args.source, items, milestones, used_llm=bool(llm_milestones))
+    else:
+        rendered = render_html(args.source, items, milestones, used_llm=bool(llm_milestones))
+    args.output.write_text(rendered, encoding="utf-8")
     source_name = "Notion database" if use_notion else str(args.source)
     print(f"Built {args.output} from {source_name}, {len(items)} rows, selected {len(milestones)} milestones.")
 

@@ -12,7 +12,7 @@ on:
         required: false
         default: ""
       style:
-        description: "Diagram style: classic or branch"
+        description: "Diagram style: classic, branch, or branch-clean"
         required: true
         default: "classic"
 

@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AFL 핵심 히스토리 타임라인</title>
+  <style>
+    @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
+
+    :root {
+      color-scheme: light;
+      --ink: #334052;
+      --muted: #8d968f;
+      --paper: #ffffff;
+      --line: rgba(15, 23, 42, 0.08);
+      --shadow: 0 18px 45px rgba(15, 23, 42, 0.10);
+    }
+
+    * { box-sizing: border-box; }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+      color: var(--ink);
+      background: #f8fafc;
+      line-height: 1.32;
+    }
+
+    main {
+      width: min(100vw, 1280px);
+      aspect-ratio: 16 / 3.2;
+      margin: 0;
+      padding: 0;
+    }
+
+    .timeline {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0)),
+        var(--paper);
+      box-shadow: var(--shadow);
+    }
+
+    .branch-board {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      padding: 18px 28px 18px;
+      background: #ffffff;
+      background-size: 72px 72px;
+    }
+
+    .branch-axis {
+      position: absolute;
+      left: 36px;
+      right: 36px;
+      top: 50%;
+      display: grid;
+      grid-template-columns: repeat(var(--count), minmax(0, 1fr));
+      height: 20px;
+      transform: translateY(-50%);
+      z-index: 2;
+    }
+
+    .branch-segment {
+      position: relative;
+      display: grid;
+      place-items: center;
+      margin-left: -1px;
+      color: #fff;
+      background: var(--accent);
+      clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 12px 50%);
+      box-shadow: 0 8px 14px rgba(80, 68, 48, 0.09);
+    }
+
+    .branch-segment:first-child {
+      clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%);
+      border-radius: 4px 0 0 4px;
+    }
+
+    .branch-segment:last-child {
+      border-radius: 0 4px 4px 0;
+    }
+
+    .branch-date {
+      position: absolute;
+      left: 50%;
+      display: block;
+      padding: 0 4px;
+      color: var(--accent);
+      font-size: 14px;
+      line-height: 1;
+      font-weight: 950;
+      letter-spacing: 0;
+      text-shadow: 0 2px 0 rgba(255,255,255,0.5);
+      white-space: nowrap;
+      transform: translateX(-50%);
+      z-index: 4;
+    }
+
+    .bottom .branch-date {
+      top: calc(50% - 37px);
+    }
+
+    .top .branch-date {
+      top: calc(50% + 22px);
+    }
+
+    .branch-items {
+      position: absolute;
+      inset: 0 36px;
+      display: grid;
+      grid-template-columns: repeat(var(--count), minmax(0, 1fr));
+      z-index: 3;
+    }
+
+    .branch-item {
+      position: relative;
+      grid-column: var(--i);
+      display: grid;
+      justify-items: center;
+      min-width: 0;
+      color: var(--accent);
+      text-align: center;
+      animation: rise 520ms ease both;
+      animation-delay: calc(var(--i) * 45ms);
+    }
+
+    .branch-copy {
+      position: absolute;
+      left: 50%;
+      width: min(174px, calc(100% + 58px));
+      transform: translateX(-50%);
+      color: #51605d;
+    }
+
+    .top .branch-copy { top: 11px; }
+    .bottom .branch-copy { bottom: 12px; }
+
+    .branch-copy h2 {
+      margin: 0 0 6px;
+      color: var(--accent);
+      font-size: 13px;
+      line-height: 1.14;
+      font-weight: 950;
+      letter-spacing: 0;
+      word-break: keep-all;
+    }
+
+    .branch-copy p {
+      margin: 0;
+      color: rgba(30, 41, 59, 0.74);
+      font-size: 10.5px;
+      line-height: 1.3;
+      font-weight: 760;
+      word-break: keep-all;
+    }
+
+    .branch-icon {
+      position: absolute;
+      left: 50%;
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--accent), white 16%);
+      color: #fff;
+      box-shadow:
+        inset 0 0 0 6px rgba(255,255,255,0.25),
+        0 12px 22px rgba(80, 68, 48, 0.14);
+      transform: translateX(-50%);
+    }
+
+    .branch-icon svg {
+      width: 22px;
+      height: 22px;
+      display: block;
+    }
+
+    .top .branch-icon { top: 57px; }
+    .bottom .branch-icon { bottom: 57px; }
+
+    .branch-stem {
+      position: absolute;
+      left: 50%;
+      width: 3px;
+      background: color-mix(in srgb, var(--accent), white 24%);
+      transform: translateX(-50%);
+      opacity: 0.72;
+    }
+
+    .top .branch-stem { top: 101px; height: calc(50% - 101px); }
+    .bottom .branch-stem { bottom: 101px; height: calc(50% - 101px); }
+
+    .branch-dot {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 7px;
+      height: 7px;
+      border: 2px solid rgba(255,255,255,0.8);
+      border-radius: 50%;
+      background: #fff;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent), white 20%);
+    }
+
+    @media (max-width: 900px) {
+      body { display: block; }
+      main { width: 100%; aspect-ratio: auto; }
+      .timeline { overflow: visible; }
+      .branch-board {
+        height: auto;
+        padding: 14px;
+        background: var(--paper);
+      }
+      .branch-axis { display: none; }
+      .branch-items {
+        position: relative;
+        inset: auto;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      .branch-item {
+        grid-column: auto;
+        display: grid;
+        grid-template-columns: 56px 1fr;
+        gap: 12px;
+        align-items: center;
+        min-height: 82px;
+        padding: 12px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.48);
+        text-align: left;
+      }
+      .branch-copy,
+      .top .branch-copy,
+      .bottom .branch-copy {
+        position: static;
+        width: auto;
+        transform: none;
+      }
+      .branch-icon,
+      .top .branch-icon,
+      .bottom .branch-icon {
+        position: static;
+        transform: none;
+      }
+      .branch-stem,
+      .branch-dot { display: none; }
+      .branch-copy h2 { font-size: 16px; }
+      .branch-copy p { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="timeline" aria-label="AFL 핵심 연혁">
+
+      <div class="branch-board" style="--count: 10;">
+        <div class="branch-axis" aria-label="AFL 핵심 연혁 연도">
+
+          <div class="branch-segment" style="--accent: #334155;"></div>
+          <div class="branch-segment" style="--accent: #0f766e;"></div>
+          <div class="branch-segment" style="--accent: #2563eb;"></div>
+          <div class="branch-segment" style="--accent: #7c3aed;"></div>
+          <div class="branch-segment" style="--accent: #0e7490;"></div>
+          <div class="branch-segment" style="--accent: #334155;"></div>
+          <div class="branch-segment" style="--accent: #0f766e;"></div>
+          <div class="branch-segment" style="--accent: #2563eb;"></div>
+          <div class="branch-segment" style="--accent: #7c3aed;"></div>
+          <div class="branch-segment" style="--accent: #0e7490;"></div>
+        </div>
+        <div class="branch-items">
+
+          <article class="branch-item bottom" style="--i: 1; --accent: #334155;">
+            <div class="branch-copy">
+              <h2>포크리프트 AGV 필요성</h2>
+              <p>창고 적재 AGV 활용 기대</p>
+            </div>
+            <div class="branch-date">2017년</div>
+            <div class="branch-stem" aria-hidden="true"></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 8h14M6 16h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/></svg></div>
+            <div class="branch-dot" aria-hidden="true"></div>
+          </article>
+          <article class="branch-item top" style="--i: 2; --accent: #0f766e;">
+            <div class="branch-copy">
+              <h2>AGV Feasibility 개발</h2>
+              <p>예일 스테커 개조, 자체 2D SLAM 적용</p>
+            </div>
+            <div class="branch-date">2017년</div>
+            <div class="branch-stem" aria-hidden="true"></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 17l7-10 7 10M8 13h8M12 7v10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="branch-dot" aria-hidden="true"></div>
+          </article>
+          <article class="branch-item bottom" style="--i: 3; --accent: #2563eb;">
+            <div class="branch-copy">
+              <h2>첫 매출 PJT</h2>
+              <p>일진글로벌 1공장, AGV 2대 적용</p>
+            </div>
+            <div class="branch-date">2019년</div>
+            <div class="branch-stem" aria-hidden="true"></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17h16M7 17V9h4v8M13 17V5h4v12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="branch-dot" aria-hidden="true"></div>
+          </article>
+          <article class="branch-item top" style="--i: 4; --accent: #7c3aed;">
+            <div class="branch-copy">
+              <h2>3D 핵심 요소 정의</h2>
+              <p>위치인식, HW, 시각화 SW 정의</p>
+            </div>
+            <div class="branch-date">2024-03</div>
+            <div class="branch-stem" aria-hidden="true"></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5v14M7 7l10 10M17 7 7 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+            <div class="branch-dot" aria-hidden="true"></div>
+          </article>
+          <article class="branch-item bottom" style="--i: 5; --accent: #0e7490;">
+            <div class="branch-copy">
+              <h2>3D SLAM 이식</h2>
+              <p>원스탭 시운전, SW 아키텍처 설계</p>
+            </div>
+            <div class="branch-date">2024-09</div>
+            <div class="branch-stem" aria-hidden="true"></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 17l7-10 7 10M8 13h8M12 7v10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="branch-dot" aria-hidden="true"></div>
+          </article>
+          <article class="branch-item top" style="--i: 6; --accent: #334155;">
+            <div class="branch-copy">
+              <h2>제품 로드맵 수립</h2>
+              <p>V1.5-V3.0 개발 방향 정의</p>
+            </div>
+            <div class="branch-date">2025-04</div>
+            <div class="branch-stem" aria-hidden="true"></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 17c4-6 10-6 14-10M6 7h5v5H6zM13 14h5v5h-5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="branch-dot" aria-hidden="true"></div>
+          </article>
+          <article class="branch-item bottom" style="--i: 7; --accent: #0f766e;">
+            <div class="branch-copy">
+              <h2>V2.0 추진계획</h2>
+              <p>중소형 생산현장 타겟</p>
+            </div>
+            <div class="branch-date">2025-07</div>
+            <div class="branch-stem" aria-hidden="true"></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v16H7zM10 8h4M10 12h4M10 16h2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="branch-dot" aria-hidden="true"></div>
+          </article>
+          <article class="branch-item top" style="--i: 8; --accent: #2563eb;">
+            <div class="branch-copy">
+              <h2>V2.0 Kick-off</h2>
+              <p>미래성장팀 협업, BM 구체화</p>
+            </div>
+            <div class="branch-date">2025-08</div>
+            <div class="branch-stem" aria-hidden="true"></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17h10M8 17l1-9h6l1 9M12 8V4M9 7l3-3 3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="branch-dot" aria-hidden="true"></div>
+          </article>
+          <article class="branch-item bottom" style="--i: 9; --accent: #7c3aed;">
+            <div class="branch-copy">
+              <h2>V2.0 마스터플랜</h2>
+              <p>기획, 설계, HW, SW, PoC, 평가</p>
+            </div>
+            <div class="branch-date">2026-05</div>
+            <div class="branch-stem" aria-hidden="true"></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h12v12H6zM9 9h6v6H9zM4 10h2M4 14h2M18 10h2M18 14h2M10 4v2M14 4v2M10 18v2M14 18v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="branch-dot" aria-hidden="true"></div>
+          </article>
+          <article class="branch-item top" style="--i: 10; --accent: #0e7490;">
+            <div class="branch-copy">
+              <h2>자체 모델 조립</h2>
+              <p>AFL V2.0 자체 모델 조립</p>
+            </div>
+            <div class="branch-date">2026-06</div>
+            <div class="branch-stem" aria-hidden="true"></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8l6-3 6 3v8l-6 3-6-3zM6 8l6 3 6-3M12 11v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="branch-dot" aria-hidden="true"></div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
