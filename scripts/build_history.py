@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import argparse
 import hashlib
@@ -18,7 +18,10 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SOURCE = ROOT / "afl history"
 DEFAULT_OUTPUT = ROOT / "afl" / "index.html"
 DEFAULT_NOTION_DATABASE_ID = "382b89a3c13380a68912fcb8b4b74e3a"
+DEFAULT_PROJECT_CONFIG = ROOT / "history-projects.json"
 NOTION_API_VERSION = "2022-06-28"
+SUMMARY_MAX_CHARS = 14
+TITLE_MAX_CHARS = 14
 
 
 @dataclass(frozen=True)
@@ -36,6 +39,18 @@ class Milestone:
     title: str
     summary: str
     sort_key: tuple[int, int, int]
+
+
+@dataclass(frozen=True)
+class ProjectConfig:
+    slug: str
+    name: str
+    source_type: str
+    notion_database_id: str | None
+    source: Path
+    output: Path
+    style: str
+    limit: int
 
 
 KEYWORDS = {
@@ -133,6 +148,19 @@ def compact_label(value: str, max_length: int) -> str:
     return f"{text[: max_length - 1].rstrip(' ,·/')}…"
 
 
+def compact_summary(value: str, max_length: int = SUMMARY_MAX_CHARS) -> str:
+    text = normalize_text(value)
+    if len(text) <= max_length:
+        return text
+
+    separators = [",", "·", "/", " 및 ", " 또는 ", " 완료", " 적용", " 개선"]
+    cut_points = [text.rfind(separator, 0, max_length + 1) for separator in separators]
+    cut_at = max(cut_points)
+    if cut_at >= max_length // 2:
+        return text[:cut_at].strip(" ,·/")
+    return text[:max_length].rstrip(" ,·/")
+
+
 def has_bad_spacing(value: str) -> bool:
     compacted = re.sub(r"[\s·,./()~:↓+-]", "", value)
     return bool(re.search(r"[가-힣A-Za-z0-9]{14,}", compacted)) and " " not in value
@@ -180,6 +208,59 @@ def env_value(*names: str) -> str | None:
         if value:
             return value
     return None
+
+
+def load_dotenv(path: Path = ROOT / ".env") -> None:
+    if not path.exists():
+        return
+    for line in path.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#") or "=" not in stripped:
+            continue
+        key, value = stripped.split("=", 1)
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if key and key not in os.environ:
+            os.environ[key] = value
+
+
+def resolve_project_path(value: str | None, default: Path) -> Path:
+    if not value:
+        return default
+    path = Path(value)
+    return path if path.is_absolute() else ROOT / path
+
+
+def project_from_dict(raw: dict) -> ProjectConfig:
+    slug = str(raw.get("slug", "")).strip()
+    if not slug:
+        raise ValueError("Project config entry is missing slug.")
+    name = str(raw.get("name") or slug).strip()
+    source_type = str(raw.get("source_type") or "notion").strip()
+    notion_database_id = raw.get("notion_database_id")
+    source = resolve_project_path(raw.get("source"), DEFAULT_SOURCE)
+    output = resolve_project_path(raw.get("output"), ROOT / slug / "index.html")
+    style = str(raw.get("style") or "branch-clean").strip()
+    limit = int(raw.get("limit") or 10)
+    return ProjectConfig(
+        slug=slug,
+        name=name,
+        source_type=source_type,
+        notion_database_id=str(notion_database_id).strip() if notion_database_id else None,
+        source=source,
+        output=output,
+        style=style,
+        limit=limit,
+    )
+
+
+def load_project_configs(path: Path) -> dict[str, ProjectConfig]:
+    if not path.exists():
+        return {}
+    data = json.loads(path.read_text(encoding="utf-8"))
+    raw_projects = data.get("projects", data if isinstance(data, list) else [])
+    projects = [project_from_dict(raw) for raw in raw_projects]
+    return {project.slug: project for project in projects}
 
 
 def notion_token() -> str | None:
@@ -385,10 +466,10 @@ def select_milestones(items: list[HistoryItem], limit: int) -> list[HistoryItem]
 
 def compact_date(raw_date: str, sort_key: tuple[int, int, int]) -> str:
     year, month, day = sort_key
-    if re.search(r"월|일", raw_date) and month:
+    numbers = re.findall(r"\d+", raw_date)
+    if len(numbers) >= 2 and month:
         return f"{year:04d}-{month:02d}"
     return f"{year:04d}년"
-
 
 def compact_title(title: str) -> str:
     replacements = {
@@ -423,7 +504,7 @@ def fallback_milestones(items: list[HistoryItem]) -> list[Milestone]:
             Milestone(
                 raw_date=compact_date(item.raw_date, item.sort_key),
                 title=compact_title(item.title),
-                summary=summary[:42],
+                summary=compact_summary(summary),
                 sort_key=item.sort_key,
             )
         )
@@ -458,13 +539,15 @@ def discover_model(base_url: str, api_key: str) -> str | None:
     try:
         data = request_json(f"{base_url}/v1/models", api_key)
     except (TimeoutError, urllib.error.URLError, urllib.error.HTTPError, json.JSONDecodeError) as error:
-        print(f"Could not discover LLM model, using fallback summaries: {error}")
-        return None
+        fallback_model = os.environ.get("AFL_LLM_FALLBACK_MODEL", "default")
+        print(f"Could not discover LLM model, trying '{fallback_model}': {error}")
+        return fallback_model
 
     models = data.get("data", [])
     if not models:
-        print("Could not discover LLM model, using fallback summaries: empty model list")
-        return None
+        fallback_model = os.environ.get("AFL_LLM_FALLBACK_MODEL", "default")
+        print(f"Could not discover LLM model, trying '{fallback_model}': empty model list")
+        return fallback_model
     return str(models[0].get("id") or "")
 
 
@@ -527,7 +610,7 @@ def ask_llm_for_milestones(items: list[HistoryItem], limit: int) -> list[Milesto
     sort_keys = [item.sort_key for item in items]
     milestones = []
     for index, item in enumerate(llm_items[:limit]):
-        date = normalize_text(str(item.get("date", "")))
+        date = compact_date(items[index].raw_date, sort_keys[index])
         title = normalize_text(str(item.get("title", "")))
         summary = normalize_text(str(item.get("summary", "")))
         if not date or not title or not summary:
@@ -538,8 +621,88 @@ def ask_llm_for_milestones(items: list[HistoryItem], limit: int) -> list[Milesto
         milestones.append(
             Milestone(
                 raw_date=date,
-                title=compact_label(title, 30),
-                summary=compact_label(summary, 34),
+                title=compact_label(title, 18),
+                summary=compact_summary(summary),
+                sort_key=sort_keys[index],
+            )
+        )
+
+    return milestones if len(milestones) == limit else None
+
+
+def ask_project_llm_for_milestones(items: list[HistoryItem], limit: int, project_name: str) -> list[Milestone] | None:
+    if not llm_configured():
+        return None
+
+    base_url = os.environ["AFL_LLM_BASE_URL"].rstrip("/")
+    api_key = os.environ["AFL_LLM_API_KEY"]
+    model = discover_model(base_url, api_key)
+    if not model:
+        return None
+
+    rows = [
+        {
+            "index": index + 1,
+            "date": compact_date(item.raw_date, item.sort_key),
+            "title": item.title,
+            "description": item.description,
+        }
+        for index, item in enumerate(items)
+    ]
+    prompt = {
+        "task": f"{project_name} 히스토리 데이터를 발표용 타임라인 라벨로 축약한다.",
+        "rules": [
+            f"입력 {limit}개 항목을 모두 사용한다. 누락하거나 새 항목을 추가하지 않는다.",
+            "입력 순서를 유지한다.",
+            "date는 입력 값을 그대로 쓴다.",
+            "title은 14자 이내의 자연스러운 한국어 라벨로 쓴다.",
+            "summary는 14자 이내의 구체적인 근거 문장으로 쓴다.",
+            "한국어 띄어쓰기를 반드시 지킨다. 단어를 억지로 붙여 쓰지 않는다.",
+            "JSON만 반환한다. 형식: {\"milestones\":[{\"date\":\"YYYY-MM 또는 YYYY년\",\"title\":\"...\",\"summary\":\"...\"}]}",
+        ],
+        "rows": rows,
+    }
+    payload = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": "You return compact Korean JSON for a business history timeline. Return JSON only."},
+            {"role": "user", "content": json.dumps(prompt, ensure_ascii=False)},
+        ],
+        "temperature": 0.2,
+    }
+
+    try:
+        data = request_json(f"{base_url}/v1/chat/completions", api_key, payload)
+    except (TimeoutError, urllib.error.URLError, urllib.error.HTTPError, json.JSONDecodeError) as error:
+        print(f"LLM unavailable, using fallback summaries: {error}")
+        return None
+
+    try:
+        content = data["choices"][0]["message"]["content"].strip()
+        if content.startswith("```"):
+            content = re.sub(r"^```(?:json)?\s*|\s*```$", "", content, flags=re.IGNORECASE | re.DOTALL)
+        parsed = json.loads(content)
+        llm_items = parsed["milestones"]
+    except (KeyError, IndexError, TypeError, json.JSONDecodeError) as error:
+        print(f"LLM response was not valid timeline JSON, using fallback summaries: {error}")
+        return None
+
+    sort_keys = [item.sort_key for item in items]
+    milestones = []
+    for index, item in enumerate(llm_items[:limit]):
+        date = compact_date(items[index].raw_date, sort_keys[index])
+        title = normalize_text(str(item.get("title", "")))
+        summary = normalize_text(str(item.get("summary", "")))
+        if not date or not title or not summary:
+            return None
+        if has_bad_spacing(title) or has_bad_spacing(summary):
+            print("LLM response had poor Korean spacing, using fallback summaries.")
+            return None
+        milestones.append(
+            Milestone(
+                raw_date=date,
+                title=compact_summary(title, TITLE_MAX_CHARS),
+                summary=compact_summary(summary),
                 sort_key=sort_keys[index],
             )
         )
@@ -551,7 +714,7 @@ def source_digest(source: Path) -> str:
     return hashlib.sha256(source.read_bytes()).hexdigest()[:12]
 
 
-def render_timeline_rows(milestones: list[Milestone]) -> str:
+def render_timeline_rows(milestones: list[Milestone], project_name: str = "AFL") -> str:
     count = len(milestones)
     nodes = []
     for index, item in enumerate(milestones):
@@ -577,7 +740,7 @@ def render_timeline_rows(milestones: list[Milestone]) -> str:
 
     return f"""
       <div class="timeline-board" style="--count: {count};">
-        <div class="segments" aria-label="AFL 핵심 연혁 연도">
+        <div class="segments" aria-label="{html.escape(project_name)} 핵심 연혁 연도">
 {segments}
         </div>
         <div class="milestones">
@@ -586,15 +749,16 @@ def render_timeline_rows(milestones: list[Milestone]) -> str:
       </div>"""
 
 
-def render_html(source: Path, items: list[HistoryItem], milestones: list[Milestone], used_llm: bool) -> str:
-    timeline_rows = render_timeline_rows(milestones)
+def render_html(source: Path, items: list[HistoryItem], milestones: list[Milestone], used_llm: bool, project_name: str = "AFL") -> str:
+    project_label = html.escape(project_name)
+    timeline_rows = render_timeline_rows(milestones, project_name=project_name)
 
     return f"""<!doctype html>
 <html lang="ko">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AFL 핵심 히스토리 타임라인</title>
+  <title>{project_label} 핵심 히스토리 타임라인</title>
   <style>
     @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
 
@@ -931,7 +1095,7 @@ def render_html(source: Path, items: list[HistoryItem], milestones: list[Milesto
 </head>
 <body>
   <main>
-    <section class="timeline" aria-label="AFL 핵심 연혁">
+    <section class="timeline" aria-label="{project_label} 핵심 연혁">
 {timeline_rows}
     </section>
   </main>
@@ -951,12 +1115,28 @@ BRANCH_ICONS = {
     "kickoff": """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17h10M8 17l1-9h6l1 9M12 8V4M9 7l3-3 3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
     "master": """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h12v12H6zM9 9h6v6H9zM4 10h2M4 14h2M18 10h2M18 14h2M10 4v2M14 4v2M10 18v2M14 18v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
     "assembly": """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8l6-3 6 3v8l-6 3-6-3zM6 8l6 3 6-3M12 11v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
+    "request": """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h7l3 3v13H7zM14 4v4h4M9 12h6M9 16h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
+    "prototype": """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8l5-3 5 3v6l-5 3-5-3zM7 8l5 3 5-3M12 11v6M5 19h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
+    "test": """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18c3-6 9-6 12 0M8 14l-2-4h12l-2 4M10 10V6h4v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
+    "durability": """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 4v5c0 5-3 8-7 9-4-1-7-4-7-9V7zM9 12l2 2 4-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
+    "mold": """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14v10H5zM8 10h3v4H8zM13 10h3v4h-3zM8 4v3M16 4v3M8 17v3M16 17v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
+    "design": """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16l6-6 4 4-6 6H4zM13 7l4-4 4 4-4 4zM14 14l4 4M16 12l4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
+    "production": """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18h16M6 18V9l4 3V9l4 3V7h4v11M8 15h2M13 15h2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
+    "feedback": """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14v10H9l-4 4zM8 10h8M8 13h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>""",
 }
 
 
 def branch_icon_for(item: Milestone) -> str:
     text = f"{item.title} {item.summary}".lower()
     rules = [
+        ("production", ("양산", "납품", "주문", "100개", "100ea")),
+        ("design", ("디자인", "도출", "설계", "알루미늄", "고무패드")),
+        ("feedback", ("피드백", "개선", "협의")),
+        ("durability", ("내구", "마모", "10배", "7배")),
+        ("mold", ("금형", "cavity", "배합", "소재")),
+        ("test", ("테스트", "주행", "mvp")),
+        ("prototype", ("시제품", "제작")),
+        ("request", ("의뢰", "접수", "개발 의뢰")),
         ("assembly", ("조립", "모델 조립", "자체 모델")),
         ("master", ("마스터플랜", "master")),
         ("kickoff", ("kick-off", "kickoff", "킥오프")),
@@ -974,7 +1154,7 @@ def branch_icon_for(item: Milestone) -> str:
     return BRANCH_ICONS["need"]
 
 
-def render_branch_rows(milestones: list[Milestone], clean: bool = False) -> str:
+def render_branch_rows(milestones: list[Milestone], clean: bool = False, project_name: str = "AFL") -> str:
     colors = (
         ["#334155", "#0f766e", "#2563eb", "#7c3aed", "#0e7490"]
         if clean
@@ -994,7 +1174,7 @@ def render_branch_rows(milestones: list[Milestone], clean: bool = False) -> str:
           <article class="branch-item {side}" style="--i: {index + 1}; --accent: {color};">
             <div class="branch-copy">
               <h2>{html.escape(compact_label(item.title, 24))}</h2>
-              <p>{html.escape(compact_label(item.summary, 36))}</p>
+              <p>{html.escape(item.summary)}</p>
             </div>
             <div class="branch-date">{html.escape(item.raw_date)}</div>
             <div class="branch-stem" aria-hidden="true"></div>
@@ -1005,7 +1185,7 @@ def render_branch_rows(milestones: list[Milestone], clean: bool = False) -> str:
 
     return f"""
       <div class="branch-board" style="--count: {len(milestones)};">
-        <div class="branch-axis" aria-label="AFL 핵심 연혁 연도">
+        <div class="branch-axis" aria-label="{html.escape(project_name)} 핵심 연혁 연도">
 {''.join(segments)}
         </div>
         <div class="branch-items">
@@ -1014,9 +1194,10 @@ def render_branch_rows(milestones: list[Milestone], clean: bool = False) -> str:
       </div>"""
 
 
-def render_branch_html(source: Path, items: list[HistoryItem], milestones: list[Milestone], used_llm: bool, clean: bool = False) -> str:
-    branch_rows = render_branch_rows(milestones, clean=clean)
-    aspect_ratio = "16 / 3.2" if clean else "16 / 4"
+def render_branch_html(source: Path, items: list[HistoryItem], milestones: list[Milestone], used_llm: bool, clean: bool = False, project_name: str = "AFL") -> str:
+    project_label = html.escape(project_name)
+    branch_rows = render_branch_rows(milestones, clean=clean, project_name=project_name)
+    aspect_ratio = "16 / 4.16" if clean else "16 / 4"
     body_background = "#f8fafc" if clean else "radial-gradient(circle at 12% 24%, rgba(255,255,255,0.54), transparent 24%), linear-gradient(135deg, #fbf3e6, #efe4d4)"
     paper = "#ffffff" if clean else "#f5ecdf"
     line = "rgba(15, 23, 42, 0.08)" if clean else "rgba(93, 111, 126, 0.16)"
@@ -1044,7 +1225,7 @@ def render_branch_html(source: Path, items: list[HistoryItem], milestones: list[
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AFL 핵심 히스토리 타임라인</title>
+  <title>{project_label} 핵심 히스토리 타임라인</title>
   <style>
     @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
 
@@ -1196,6 +1377,7 @@ def render_branch_html(source: Path, items: list[HistoryItem], milestones: list[
       line-height: 1.14;
       font-weight: 950;
       letter-spacing: 0;
+      white-space: nowrap;
       word-break: keep-all;
     }}
 
@@ -1309,7 +1491,7 @@ def render_branch_html(source: Path, items: list[HistoryItem], milestones: list[
 </head>
 <body>
   <main>
-    <section class="timeline" aria-label="AFL 핵심 연혁">
+    <section class="timeline" aria-label="{project_label} 핵심 연혁">
 {branch_rows}
     </section>
   </main>
@@ -1318,37 +1500,86 @@ def render_branch_html(source: Path, items: list[HistoryItem], milestones: list[
 """
 
 
+def build_history(
+    source: Path,
+    source_type: str,
+    notion_database_id: str | None,
+    output: Path,
+    style: str,
+    limit: int,
+    project_name: str,
+    no_llm: bool,
+) -> None:
+    use_notion = source_type == "notion" or (source_type == "auto" and notion_configured())
+    items = load_notion_items(notion_database_id) if use_notion else load_items(source)
+    if not items:
+        source_name = "Notion database" if use_notion else str(source)
+        raise SystemExit(f"No history rows found in {source_name}")
+
+    selected = select_milestones(items, limit)
+    llm_milestones = None if no_llm else ask_project_llm_for_milestones(selected, limit, project_name)
+    milestones = llm_milestones or fallback_milestones(selected)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    if style == "branch-clean":
+        rendered = render_branch_html(source, items, milestones, used_llm=bool(llm_milestones), clean=True, project_name=project_name)
+    elif style == "branch":
+        rendered = render_branch_html(source, items, milestones, used_llm=bool(llm_milestones), project_name=project_name)
+    else:
+        rendered = render_html(source, items, milestones, used_llm=bool(llm_milestones), project_name=project_name)
+    output.write_text(rendered, encoding="utf-8")
+    source_name = "Notion database" if use_notion else str(source)
+    print(f"Built {output} from {source_name}, {len(items)} rows, selected {len(milestones)} milestones.")
+
+
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Build the AFL history diagram HTML.")
+    load_dotenv()
+    parser = argparse.ArgumentParser(description="Build history diagram HTML pages.")
     parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE)
     parser.add_argument("--source-type", choices=("auto", "file", "notion"), default="auto")
     parser.add_argument("--notion-database-id", default=None)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--style", choices=("classic", "branch", "branch-clean"), default="classic")
     parser.add_argument("--limit", type=int, default=12)
+    parser.add_argument("--project-name", default="AFL")
+    parser.add_argument("--project", help="Project slug from history-projects.json, or all.")
+    parser.add_argument("--project-config", type=Path, default=DEFAULT_PROJECT_CONFIG)
     parser.add_argument("--no-llm", action="store_true", help="Do not call the configured internal LLM.")
     args = parser.parse_args()
 
-    use_notion = args.source_type == "notion" or (args.source_type == "auto" and notion_configured())
-    items = load_notion_items(args.notion_database_id) if use_notion else load_items(args.source)
-    if not items:
-        source_name = "Notion database" if use_notion else str(args.source)
-        raise SystemExit(f"No history rows found in {source_name}")
+    if args.project:
+        projects = load_project_configs(resolve_project_path(str(args.project_config), DEFAULT_PROJECT_CONFIG))
+        if not projects:
+            raise SystemExit(f"No projects found in {args.project_config}")
+        selected_projects = list(projects.values()) if args.project == "all" else [projects.get(args.project)]
+        if any(project is None for project in selected_projects):
+            available = ", ".join(sorted(projects))
+            raise SystemExit(f"Unknown project '{args.project}'. Available: {available}")
+        for project in selected_projects:
+            assert project is not None
+            build_history(
+                source=project.source,
+                source_type=project.source_type,
+                notion_database_id=project.notion_database_id,
+                output=project.output,
+                style=project.style,
+                limit=project.limit,
+                project_name=project.name,
+                no_llm=args.no_llm,
+            )
+        return
 
-    selected = select_milestones(items, args.limit)
-    llm_milestones = None if args.no_llm else ask_llm_for_milestones(selected, args.limit)
-    milestones = llm_milestones or fallback_milestones(selected)
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    if args.style == "branch-clean":
-        rendered = render_branch_html(args.source, items, milestones, used_llm=bool(llm_milestones), clean=True)
-    elif args.style == "branch":
-        rendered = render_branch_html(args.source, items, milestones, used_llm=bool(llm_milestones))
-    else:
-        rendered = render_html(args.source, items, milestones, used_llm=bool(llm_milestones))
-    args.output.write_text(rendered, encoding="utf-8")
-    source_name = "Notion database" if use_notion else str(args.source)
-    print(f"Built {args.output} from {source_name}, {len(items)} rows, selected {len(milestones)} milestones.")
+    build_history(
+        source=args.source,
+        source_type=args.source_type,
+        notion_database_id=args.notion_database_id,
+        output=args.output,
+        style=args.style,
+        limit=args.limit,
+        project_name=args.project_name,
+        no_llm=args.no_llm,
+    )
 
 
 if __name__ == "__main__":
     main()
+

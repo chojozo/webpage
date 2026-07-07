@@ -1,5 +1,23 @@
 # History Diagram Pages
 
+## Project config workflow
+
+Project DBs are managed in `history-projects.json`.
+
+Build one page:
+
+```powershell
+python .\scripts\build_history.py --project robofoot
+```
+
+Build every configured page:
+
+```powershell
+python .\scripts\build_history.py --project all
+```
+
+Put `NOTION_TOKEN`, `AFL_LLM_BASE_URL`, `AFL_LLM_API_KEY`, and `AFL_LLM_MODEL` in local `.env`. To add another page, add one object to `history-projects.json` with `slug`, `name`, `notion_database_id`, `output`, `style`, and `limit`.
+
 Notion DB를 읽어서 히스토리 다이어그램 HTML을 생성합니다.
 
 GitHub Pages가 `main` 브랜치의 저장소 루트를 바라보면 아래처럼 배포됩니다.

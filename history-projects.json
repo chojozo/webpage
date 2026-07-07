@@ -1,0 +1,22 @@
+{
+  "projects": [
+    {
+      "slug": "afl2",
+      "name": "AFL",
+      "source_type": "notion",
+      "notion_database_id": "382b89a3c13380a68912fcb8b4b74e3a",
+      "output": "afl2/index.html",
+      "style": "branch-clean",
+      "limit": 10
+    },
+    {
+      "slug": "robofoot",
+      "name": "Robofoot",
+      "source_type": "notion",
+      "notion_database_id": "388b89a3c13380059909d7b755b67d46",
+      "output": "robofoot/index.html",
+      "style": "branch-clean",
+      "limit": 10
+    }
+  ]
+}
