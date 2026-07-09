@@ -35,7 +35,7 @@
     }
 
     main {
-      width: min(100vw, 1280px);
+      width: min(100vw, 1152px);
       aspect-ratio: 16 / 4.16;
       margin: 0;
       padding: 0;
@@ -96,21 +96,29 @@
     .branch-date {
       position: absolute;
       left: 50%;
-      display: block;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
       padding: 0 4px;
       color: var(--accent);
-      font-size: 14px;
       line-height: 1;
-      font-weight: 950;
-      letter-spacing: 0;
-      text-shadow: 0 2px 0 rgba(255,255,255,0.5);
       white-space: nowrap;
       transform: translateX(-50%);
       z-index: 4;
     }
 
+    .branch-date-text {
+      display: block;
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 950;
+      letter-spacing: 0;
+      text-shadow: 0 2px 0 rgba(255,255,255,0.5);
+    }
+
     .bottom .branch-date {
-      top: calc(50% - 37px);
+      top: calc(50% - 49px);
     }
 
     .top .branch-date {
@@ -148,8 +156,20 @@
     .top .branch-copy { top: 11px; }
     .bottom .branch-copy { bottom: 12px; }
 
+    .branch-category {
+      display: inline-block;
+      padding: 1px 5px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--accent), #ffffff 82%);
+      color: var(--accent);
+      font-size: 8px;
+      line-height: 1.25;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
     .branch-copy h2 {
-      margin: 0 0 6px;
+      margin: 0 0 4px;
       color: var(--accent);
       font-size: 13px;
       line-height: 1.14;
@@ -275,114 +295,114 @@
         <div class="branch-axis" aria-label="Robofoot 핵심 연혁 연도">
 
           <div class="branch-segment" style="--accent: #334155;"></div>
-          <div class="branch-segment" style="--accent: #0f766e;"></div>
-          <div class="branch-segment" style="--accent: #2563eb;"></div>
-          <div class="branch-segment" style="--accent: #7c3aed;"></div>
-          <div class="branch-segment" style="--accent: #0e7490;"></div>
           <div class="branch-segment" style="--accent: #334155;"></div>
           <div class="branch-segment" style="--accent: #0f766e;"></div>
+          <div class="branch-segment" style="--accent: #0f766e;"></div>
+          <div class="branch-segment" style="--accent: #334155;"></div>
           <div class="branch-segment" style="--accent: #2563eb;"></div>
           <div class="branch-segment" style="--accent: #7c3aed;"></div>
-          <div class="branch-segment" style="--accent: #0e7490;"></div>
+          <div class="branch-segment" style="--accent: #7c3aed;"></div>
+          <div class="branch-segment" style="--accent: #334155;"></div>
+          <div class="branch-segment" style="--accent: #2563eb;"></div>
         </div>
         <div class="branch-items">
 
           <article class="branch-item bottom" style="--i: 1; --accent: #334155;">
             <div class="branch-copy">
-              <h2>사족보행로봇 개발의뢰접수</h2>
-              <p>비브람 볼핏 소재 분석</p>
+              <h2>사족보행 로봇 의뢰</h2>
+              <p>사용품 분석·금형 설계</p>
             </div>
-            <div class="branch-date">2024-09</div>
+            <div class="branch-date"><span class="branch-category">라이온 4족</span><span class="branch-date-text">2024-09</span></div>
+            <div class="branch-stem" aria-hidden="true"></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16l6-6 4 4-6 6H4zM13 7l4-4 4 4-4 4zM14 14l4 4M16 12l4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="branch-dot" aria-hidden="true"></div>
+          </article>
+          <article class="branch-item top" style="--i: 2; --accent: #334155;">
+            <div class="branch-copy">
+              <h2>1차 시제품 테스트</h2>
+              <p>마모 7배 우수 확인</p>
+            </div>
+            <div class="branch-date"><span class="branch-date-text">2024-12</span><span class="branch-category">라이온 4족</span></div>
+            <div class="branch-stem" aria-hidden="true"></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 4v5c0 5-3 8-7 9-4-1-7-4-7-9V7zM9 12l2 2 4-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="branch-dot" aria-hidden="true"></div>
+          </article>
+          <article class="branch-item bottom" style="--i: 3; --accent: #0f766e;">
+            <div class="branch-copy">
+              <h2>드론 로봇발 의뢰</h2>
+              <p>소재 분석·금형 설계</p>
+            </div>
+            <div class="branch-date"><span class="branch-category">드론 로봇발</span><span class="branch-date-text">2025-04</span></div>
+            <div class="branch-stem" aria-hidden="true"></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16l6-6 4 4-6 6H4zM13 7l4-4 4 4-4 4zM14 14l4 4M16 12l4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="branch-dot" aria-hidden="true"></div>
+          </article>
+          <article class="branch-item top" style="--i: 4; --accent: #0f766e;">
+            <div class="branch-copy">
+              <h2>플라스틱 금형 제작</h2>
+              <p>3D프린팅·고무 가황</p>
+            </div>
+            <div class="branch-date"><span class="branch-date-text">2025-05</span><span class="branch-category">드론 로봇발</span></div>
             <div class="branch-stem" aria-hidden="true"></div>
             <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14v10H5zM8 10h3v4H8zM13 10h3v4h-3zM8 4v3M16 4v3M8 17v3M16 17v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
             <div class="branch-dot" aria-hidden="true"></div>
           </article>
-          <article class="branch-item top" style="--i: 2; --accent: #0f766e;">
+          <article class="branch-item bottom" style="--i: 5; --accent: #334155;">
             <div class="branch-copy">
-              <h2>1차 시제품 주행 테스트</h2>
-              <p>마모성능 7배 우수</p>
+              <h2>500ea 정식 납품</h2>
+              <p>1Cavity 금형 500</p>
             </div>
-            <div class="branch-date">2024-12</div>
-            <div class="branch-stem" aria-hidden="true"></div>
-            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 4v5c0 5-3 8-7 9-4-1-7-4-7-9V7zM9 12l2 2 4-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <div class="branch-dot" aria-hidden="true"></div>
-          </article>
-          <article class="branch-item bottom" style="--i: 3; --accent: #2563eb;">
-            <div class="branch-copy">
-              <h2>1차 시제품 내구성 피드백</h2>
-              <p>내구성 10배 이상 확인</p>
-            </div>
-            <div class="branch-date">2025-01</div>
-            <div class="branch-stem" aria-hidden="true"></div>
-            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14v10H9l-4 4zM8 10h8M8 13h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <div class="branch-dot" aria-hidden="true"></div>
-          </article>
-          <article class="branch-item top" style="--i: 4; --accent: #7c3aed;">
-            <div class="branch-copy">
-              <h2>드론 로봇발 개발 의뢰</h2>
-              <p>벤치마킹·금형 설계</p>
-            </div>
-            <div class="branch-date">2025-04</div>
-            <div class="branch-stem" aria-hidden="true"></div>
-            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16l6-6 4 4-6 6H4zM13 7l4-4 4 4-4 4zM14 14l4 4M16 12l4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <div class="branch-dot" aria-hidden="true"></div>
-          </article>
-          <article class="branch-item bottom" style="--i: 5; --accent: #0e7490;">
-            <div class="branch-copy">
-              <h2>수직승월 사족보행 로봇</h2>
-              <p>소음·접지·내구성 향상</p>
-            </div>
-            <div class="branch-date">2025-09</div>
-            <div class="branch-stem" aria-hidden="true"></div>
-            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 4v5c0 5-3 8-7 9-4-1-7-4-7-9V7zM9 12l2 2 4-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <div class="branch-dot" aria-hidden="true"></div>
-          </article>
-          <article class="branch-item top" style="--i: 6; --accent: #334155;">
-            <div class="branch-copy">
-              <h2>1차 MVP 피드백 협의</h2>
-              <p>프린팅 자국 접착 저하</p>
-            </div>
-            <div class="branch-date">2025-09</div>
-            <div class="branch-stem" aria-hidden="true"></div>
-            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14v10H9l-4 4zM8 10h8M8 13h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <div class="branch-dot" aria-hidden="true"></div>
-          </article>
-          <article class="branch-item bottom" style="--i: 7; --accent: #0f766e;">
-            <div class="branch-copy">
-              <h2>1차 시제품 주행 테스트</h2>
-              <p>고무경도·접지력 만족</p>
-            </div>
-            <div class="branch-date">2026-01</div>
-            <div class="branch-stem" aria-hidden="true"></div>
-            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18c3-6 9-6 12 0M8 14l-2-4h12l-2 4M10 10V6h4v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <div class="branch-dot" aria-hidden="true"></div>
-          </article>
-          <article class="branch-item top" style="--i: 8; --accent: #2563eb;">
-            <div class="branch-copy">
-              <h2>정식 주문 100ea 양산</h2>
-              <p>양산 금형 4형, 100개</p>
-            </div>
-            <div class="branch-date">2026-06</div>
+            <div class="branch-date"><span class="branch-category">라이온 4족</span><span class="branch-date-text">2025-08</span></div>
             <div class="branch-stem" aria-hidden="true"></div>
             <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18h16M6 18V9l4 3V9l4 3V7h4v11M8 15h2M13 15h2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
             <div class="branch-dot" aria-hidden="true"></div>
           </article>
-          <article class="branch-item bottom" style="--i: 9; --accent: #7c3aed;">
+          <article class="branch-item top" style="--i: 6; --accent: #2563eb;">
             <div class="branch-copy">
-              <h2>2차 시제품 피드백 설계</h2>
-              <p>접지력 향상·3차 시제품</p>
+              <h2>수직승월 로봇 의뢰</h2>
+              <p>소음·접지력 개선</p>
             </div>
-            <div class="branch-date">2026-06</div>
+            <div class="branch-date"><span class="branch-date-text">2025-09</span><span class="branch-category">디든 승월</span></div>
             <div class="branch-stem" aria-hidden="true"></div>
-            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16l6-6 4 4-6 6H4zM13 7l4-4 4 4-4 4zM14 14l4 4M16 12l4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14v10H9l-4 4zM8 10h8M8 13h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
             <div class="branch-dot" aria-hidden="true"></div>
           </article>
-          <article class="branch-item top" style="--i: 10; --accent: #0e7490;">
+          <article class="branch-item bottom" style="--i: 7; --accent: #7c3aed;">
             <div class="branch-copy">
-              <h2>1차 디자인 도출 완료</h2>
-              <p>디자인 15% 경량화</p>
+              <h2>2족 보행 로봇 의뢰</h2>
+              <p>우레탄 마찰 개선</p>
             </div>
-            <div class="branch-date">2026-06</div>
+            <div class="branch-date"><span class="branch-category">디든 2족</span><span class="branch-date-text">2025-12</span></div>
+            <div class="branch-stem" aria-hidden="true"></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14v10H9l-4 4zM8 10h8M8 13h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="branch-dot" aria-hidden="true"></div>
+          </article>
+          <article class="branch-item top" style="--i: 8; --accent: #7c3aed;">
+            <div class="branch-copy">
+              <h2>1차 시제품 주행</h2>
+              <p>30분 테스트 만족</p>
+            </div>
+            <div class="branch-date"><span class="branch-date-text">2026-01</span><span class="branch-category">디든 2족</span></div>
+            <div class="branch-stem" aria-hidden="true"></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18c3-6 9-6 12 0M8 14l-2-4h12l-2 4M10 10V6h4v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="branch-dot" aria-hidden="true"></div>
+          </article>
+          <article class="branch-item bottom" style="--i: 9; --accent: #334155;">
+            <div class="branch-copy">
+              <h2>100ea 양산 납품</h2>
+              <p>4Cavity 금형 사용</p>
+            </div>
+            <div class="branch-date"><span class="branch-category">라이온 4족</span><span class="branch-date-text">2026-06</span></div>
+            <div class="branch-stem" aria-hidden="true"></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18h16M6 18V9l4 3V9l4 3V7h4v11M8 15h2M13 15h2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="branch-dot" aria-hidden="true"></div>
+          </article>
+          <article class="branch-item top" style="--i: 10; --accent: #2563eb;">
+            <div class="branch-copy">
+              <h2>3차 시제품 설계</h2>
+              <p>접지력 향상 피드백</p>
+            </div>
+            <div class="branch-date"><span class="branch-date-text">2026-06</span><span class="branch-category">디든 승월</span></div>
             <div class="branch-stem" aria-hidden="true"></div>
             <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16l6-6 4 4-6 6H4zM13 7l4-4 4 4-4 4zM14 14l4 4M16 12l4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
             <div class="branch-dot" aria-hidden="true"></div>

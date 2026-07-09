@@ -16,7 +16,8 @@
       "notion_database_id": "388b89a3c13380059909d7b755b67d46",
       "output": "robofoot/index.html",
       "style": "branch-clean",
-      "limit": 10
+      "limit": 10,
+      "show_category": true
     },
     {
       "slug": "minifarm",

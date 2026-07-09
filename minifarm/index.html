@@ -35,7 +35,7 @@
     }
 
     main {
-      width: min(100vw, 1280px);
+      width: min(100vw, 1152px);
       aspect-ratio: 16 / 4.16;
       margin: 0;
       padding: 0;
@@ -96,21 +96,29 @@
     .branch-date {
       position: absolute;
       left: 50%;
-      display: block;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
       padding: 0 4px;
       color: var(--accent);
-      font-size: 14px;
       line-height: 1;
-      font-weight: 950;
-      letter-spacing: 0;
-      text-shadow: 0 2px 0 rgba(255,255,255,0.5);
       white-space: nowrap;
       transform: translateX(-50%);
       z-index: 4;
     }
 
+    .branch-date-text {
+      display: block;
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 950;
+      letter-spacing: 0;
+      text-shadow: 0 2px 0 rgba(255,255,255,0.5);
+    }
+
     .bottom .branch-date {
-      top: calc(50% - 37px);
+      top: calc(50% - 49px);
     }
 
     .top .branch-date {
@@ -148,8 +156,20 @@
     .top .branch-copy { top: 11px; }
     .bottom .branch-copy { bottom: 12px; }
 
+    .branch-category {
+      display: inline-block;
+      padding: 1px 5px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--accent), #ffffff 82%);
+      color: var(--accent);
+      font-size: 8px;
+      line-height: 1.25;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
     .branch-copy h2 {
-      margin: 0 0 6px;
+      margin: 0 0 4px;
       color: var(--accent);
       font-size: 13px;
       line-height: 1.14;
@@ -289,102 +309,102 @@
 
           <article class="branch-item bottom" style="--i: 1; --accent: #334155;">
             <div class="branch-copy">
-              <h2>사내 유휴부지 현장 조사</h2>
-              <p>사내 유휴부지 조사 완료</p>
+              <h2>유휴부지 조사</h2>
+              <p>현장 조사 완료</p>
             </div>
-            <div class="branch-date">2024-10</div>
+            <div class="branch-date"><span class="branch-date-text">2024-10</span></div>
             <div class="branch-stem" aria-hidden="true"></div>
             <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 8h14M6 16h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/></svg></div>
             <div class="branch-dot" aria-hidden="true"></div>
           </article>
           <article class="branch-item top" style="--i: 2; --accent: #0f766e;">
             <div class="branch-copy">
-              <h2>MiniFarm 조립 완료</h2>
-              <p>1천만원 재료비로 조립</p>
+              <h2>수직농장 설계 시작</h2>
+              <p>설계 구체화 시작</p>
             </div>
-            <div class="branch-date">2025-04</div>
+            <div class="branch-date"><span class="branch-date-text">2024-11</span></div>
             <div class="branch-stem" aria-hidden="true"></div>
-            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8l6-3 6 3v8l-6 3-6-3zM6 8l6 3 6-3M12 11v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16l6-6 4 4-6 6H4zM13 7l4-4 4 4-4 4zM14 14l4 4M16 12l4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
             <div class="branch-dot" aria-hidden="true"></div>
           </article>
           <article class="branch-item bottom" style="--i: 3; --accent: #2563eb;">
             <div class="branch-copy">
-              <h2>클라우드 서버 세팅</h2>
-              <p>AWS 서버와 DB 구축</p>
+              <h2>MiniFarm MVP…</h2>
+              <p>재료비 1천만원 조립</p>
             </div>
-            <div class="branch-date">2025-05</div>
+            <div class="branch-date"><span class="branch-date-text">2025-04</span></div>
             <div class="branch-stem" aria-hidden="true"></div>
-            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 8h14M6 16h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/></svg></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18c3-6 9-6 12 0M8 14l-2-4h12l-2 4M10 10V6h4v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
             <div class="branch-dot" aria-hidden="true"></div>
           </article>
           <article class="branch-item top" style="--i: 4; --accent: #7c3aed;">
             <div class="branch-copy">
-              <h2>버터헤드 2차 파종</h2>
-              <p>40일 후 2.1kg 수확</p>
+              <h2>첫 파종·수확</h2>
+              <p>로메인 660g 수확</p>
             </div>
-            <div class="branch-date">2025-06</div>
+            <div class="branch-date"><span class="branch-date-text">2025-04</span></div>
             <div class="branch-stem" aria-hidden="true"></div>
             <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 8h14M6 16h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/></svg></div>
             <div class="branch-dot" aria-hidden="true"></div>
           </article>
           <article class="branch-item bottom" style="--i: 5; --accent: #0e7490;">
             <div class="branch-copy">
-              <h2>로메인·바질 3차 파종</h2>
-              <p>로메인·바질 수확 기록</p>
+              <h2>클라우드 서버 구축</h2>
+              <p>AWS 서버·DB 구축</p>
             </div>
-            <div class="branch-date">2025-08</div>
+            <div class="branch-date"><span class="branch-date-text">2025-05</span></div>
             <div class="branch-stem" aria-hidden="true"></div>
             <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 8h14M6 16h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/></svg></div>
             <div class="branch-dot" aria-hidden="true"></div>
           </article>
           <article class="branch-item top" style="--i: 6; --accent: #334155;">
             <div class="branch-copy">
-              <h2>DRB Tech 참석</h2>
-              <p>스마트팜 동향 공유</p>
+              <h2>센서 데이터 연동</h2>
+              <p>온·습·수위 DB 전송</p>
             </div>
-            <div class="branch-date">2025-09</div>
+            <div class="branch-date"><span class="branch-date-text">2025-06</span></div>
             <div class="branch-stem" aria-hidden="true"></div>
             <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 8h14M6 16h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/></svg></div>
             <div class="branch-dot" aria-hidden="true"></div>
           </article>
           <article class="branch-item bottom" style="--i: 7; --accent: #0f766e;">
             <div class="branch-copy">
-              <h2>센서 노드 제작</h2>
-              <p>통합 센서 노드 설치</p>
+              <h2>관제 시스템 개발</h2>
+              <p>통계·실시간 조회</p>
             </div>
-            <div class="branch-date">2025-11</div>
+            <div class="branch-date"><span class="branch-date-text">2025-07</span></div>
             <div class="branch-stem" aria-hidden="true"></div>
-            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8l5-3 5 3v6l-5 3-5-3zM7 8l5 3 5-3M12 11v6M5 19h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17h10M8 17l1-9h6l1 9M9 8l3-4 3 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
             <div class="branch-dot" aria-hidden="true"></div>
           </article>
           <article class="branch-item top" style="--i: 8; --accent: #2563eb;">
             <div class="branch-copy">
-              <h2>센서 수집 업그레이드</h2>
-              <p>MQTT 도입 및 레이아웃</p>
+              <h2>다중 작물 파종</h2>
+              <p>로메인·바질 동시 수확</p>
             </div>
-            <div class="branch-date">2026-01</div>
+            <div class="branch-date"><span class="branch-date-text">2025-08</span></div>
             <div class="branch-stem" aria-hidden="true"></div>
             <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 8h14M6 16h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/></svg></div>
             <div class="branch-dot" aria-hidden="true"></div>
           </article>
           <article class="branch-item bottom" style="--i: 9; --accent: #7c3aed;">
             <div class="branch-copy">
-              <h2>병풀 2차 정식</h2>
-              <p>녹조로 2차 재시도</p>
+              <h2>바질 페스토 나눔</h2>
+              <p>바질 페스토 제작</p>
             </div>
-            <div class="branch-date">2026-03</div>
+            <div class="branch-date"><span class="branch-date-text">2025-12</span></div>
             <div class="branch-stem" aria-hidden="true"></div>
-            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 8h14M6 16h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/></svg></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8l5-3 5 3v6l-5 3-5-3zM7 8l5 3 5-3M12 11v6M5 19h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
             <div class="branch-dot" aria-hidden="true"></div>
           </article>
           <article class="branch-item top" style="--i: 10; --accent: #0e7490;">
             <div class="branch-copy">
-              <h2>병풀 3차 정식</h2>
-              <p>녹조로 3차 재시도</p>
+              <h2>MQTT 데이터 업그레이드</h2>
+              <p>MQTT 도입·DB 개선</p>
             </div>
-            <div class="branch-date">2026-05</div>
+            <div class="branch-date"><span class="branch-date-text">2026-01</span></div>
             <div class="branch-stem" aria-hidden="true"></div>
-            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 8h14M6 16h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/></svg></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14v10H9l-4 4zM8 10h8M8 13h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
             <div class="branch-dot" aria-hidden="true"></div>
           </article>
         </div>

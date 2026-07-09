@@ -35,7 +35,7 @@
     }
 
     main {
-      width: min(100vw, 1280px);
+      width: min(100vw, 1152px);
       aspect-ratio: 16 / 4.16;
       margin: 0;
       padding: 0;
@@ -96,21 +96,29 @@
     .branch-date {
       position: absolute;
       left: 50%;
-      display: block;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
       padding: 0 4px;
       color: var(--accent);
-      font-size: 14px;
       line-height: 1;
-      font-weight: 950;
-      letter-spacing: 0;
-      text-shadow: 0 2px 0 rgba(255,255,255,0.5);
       white-space: nowrap;
       transform: translateX(-50%);
       z-index: 4;
     }
 
+    .branch-date-text {
+      display: block;
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 950;
+      letter-spacing: 0;
+      text-shadow: 0 2px 0 rgba(255,255,255,0.5);
+    }
+
     .bottom .branch-date {
-      top: calc(50% - 37px);
+      top: calc(50% - 49px);
     }
 
     .top .branch-date {
@@ -148,13 +156,26 @@
     .top .branch-copy { top: 11px; }
     .bottom .branch-copy { bottom: 12px; }
 
+    .branch-category {
+      display: inline-block;
+      padding: 1px 5px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--accent), #ffffff 82%);
+      color: var(--accent);
+      font-size: 8px;
+      line-height: 1.25;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
     .branch-copy h2 {
-      margin: 0 0 6px;
+      margin: 0 0 4px;
       color: var(--accent);
       font-size: 13px;
       line-height: 1.14;
       font-weight: 950;
       letter-spacing: 0;
+      white-space: nowrap;
       word-break: keep-all;
     }
 
@@ -288,102 +309,102 @@
 
           <article class="branch-item bottom" style="--i: 1; --accent: #334155;">
             <div class="branch-copy">
-              <h2>포크리프트 AGV 필요성</h2>
-              <p>창고 적재 AGV 활용 기대</p>
+              <h2>AGV 타당성 검증</h2>
+              <p>지원 거절, 자체 SLAM</p>
             </div>
-            <div class="branch-date">2017년</div>
+            <div class="branch-date"><span class="branch-date-text">2017년</span></div>
             <div class="branch-stem" aria-hidden="true"></div>
-            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 8h14M6 16h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/></svg></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 17l7-10 7 10M8 13h8M12 7v10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
             <div class="branch-dot" aria-hidden="true"></div>
           </article>
           <article class="branch-item top" style="--i: 2; --accent: #0f766e;">
             <div class="branch-copy">
-              <h2>AGV Feasibility 개발</h2>
-              <p>예일 스테커 개조, 자체 2D SLAM 적용</p>
+              <h2>첫 매출 포크리프트 AGV</h2>
+              <p>일진글로벌 2대 납품</p>
             </div>
-            <div class="branch-date">2017년</div>
+            <div class="branch-date"><span class="branch-date-text">2019년</span></div>
             <div class="branch-stem" aria-hidden="true"></div>
-            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 17l7-10 7 10M8 13h8M12 7v10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18h16M6 18V9l4 3V9l4 3V7h4v11M8 15h2M13 15h2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
             <div class="branch-dot" aria-hidden="true"></div>
           </article>
           <article class="branch-item bottom" style="--i: 3; --accent: #2563eb;">
             <div class="branch-copy">
-              <h2>첫 매출 PJT</h2>
-              <p>일진글로벌 1공장, AGV 2대 적용</p>
+              <h2>제조 고려 AGV 워크샵</h2>
+              <p>TFT 구성, AFL 명칭</p>
             </div>
-            <div class="branch-date">2019년</div>
+            <div class="branch-date"><span class="branch-date-text">2023-02</span></div>
             <div class="branch-stem" aria-hidden="true"></div>
-            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17h16M7 17V9h4v8M13 17V5h4v12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 8h14M6 16h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/></svg></div>
             <div class="branch-dot" aria-hidden="true"></div>
           </article>
           <article class="branch-item top" style="--i: 4; --accent: #7c3aed;">
             <div class="branch-copy">
-              <h2>3D 핵심 요소 정의</h2>
-              <p>위치인식, HW, 시각화 SW 정의</p>
+              <h2>AFL TFT 결과 토론</h2>
+              <p>시장·기술 고도화 검토</p>
             </div>
-            <div class="branch-date">2024-03</div>
+            <div class="branch-date"><span class="branch-date-text">2023-07</span></div>
             <div class="branch-stem" aria-hidden="true"></div>
-            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5v14M7 7l10 10M17 7 7 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 8h14M6 16h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/></svg></div>
             <div class="branch-dot" aria-hidden="true"></div>
           </article>
           <article class="branch-item bottom" style="--i: 5; --accent: #0e7490;">
             <div class="branch-copy">
-              <h2>3D SLAM 이식</h2>
-              <p>원스탭 시운전, SW 아키텍처 설계</p>
+              <h2>AFL 3D 핵심 정의</h2>
+              <p>위치 강인도·HW 의존↓</p>
             </div>
-            <div class="branch-date">2024-09</div>
+            <div class="branch-date"><span class="branch-date-text">2024-03</span></div>
             <div class="branch-stem" aria-hidden="true"></div>
-            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 17l7-10 7 10M8 13h8M12 7v10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5v14M7 7l10 10M17 7 7 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
             <div class="branch-dot" aria-hidden="true"></div>
           </article>
           <article class="branch-item top" style="--i: 6; --accent: #334155;">
             <div class="branch-copy">
-              <h2>제품 로드맵 수립</h2>
-              <p>V1.5-V3.0 개발 방향 정의</p>
+              <h2>AFL 로드맵 수립</h2>
+              <p>V1.5~V3.0 목표</p>
             </div>
-            <div class="branch-date">2025-04</div>
+            <div class="branch-date"><span class="branch-date-text">2025-04</span></div>
             <div class="branch-stem" aria-hidden="true"></div>
             <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 17c4-6 10-6 14-10M6 7h5v5H6zM13 14h5v5h-5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
             <div class="branch-dot" aria-hidden="true"></div>
           </article>
           <article class="branch-item bottom" style="--i: 7; --accent: #0f766e;">
             <div class="branch-copy">
-              <h2>V2.0 추진계획</h2>
-              <p>중소형 생산현장 타겟</p>
+              <h2>AFL V2.0 추진계획</h2>
+              <p>중소형 현장 타깃 설정</p>
             </div>
-            <div class="branch-date">2025-07</div>
+            <div class="branch-date"><span class="branch-date-text">2025-07</span></div>
             <div class="branch-stem" aria-hidden="true"></div>
             <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v16H7zM10 8h4M10 12h4M10 16h2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
             <div class="branch-dot" aria-hidden="true"></div>
           </article>
           <article class="branch-item top" style="--i: 8; --accent: #2563eb;">
             <div class="branch-copy">
-              <h2>V2.0 Kick-off</h2>
-              <p>미래성장팀 협업, BM 구체화</p>
+              <h2>AFL V2.0 차량 설계</h2>
+              <p>표준형 사양 비교·설계</p>
             </div>
-            <div class="branch-date">2025-08</div>
+            <div class="branch-date"><span class="branch-date-text">2025-09</span></div>
             <div class="branch-stem" aria-hidden="true"></div>
-            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17h10M8 17l1-9h6l1 9M12 8V4M9 7l3-3 3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16l6-6 4 4-6 6H4zM13 7l4-4 4 4-4 4zM14 14l4 4M16 12l4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
             <div class="branch-dot" aria-hidden="true"></div>
           </article>
           <article class="branch-item bottom" style="--i: 9; --accent: #7c3aed;">
             <div class="branch-copy">
-              <h2>V2.0 마스터플랜</h2>
-              <p>기획, 설계, HW, SW, PoC, 평가</p>
+              <h2>AFL V2.0 마스터플랜</h2>
+              <p>전체 개발·평가 로드맵</p>
             </div>
-            <div class="branch-date">2026-05</div>
+            <div class="branch-date"><span class="branch-date-text">2026-05</span></div>
             <div class="branch-stem" aria-hidden="true"></div>
             <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h12v12H6zM9 9h6v6H9zM4 10h2M4 14h2M18 10h2M18 14h2M10 4v2M14 4v2M10 18v2M14 18v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
             <div class="branch-dot" aria-hidden="true"></div>
           </article>
           <article class="branch-item top" style="--i: 10; --accent: #0e7490;">
             <div class="branch-copy">
-              <h2>자체 모델 조립</h2>
-              <p>AFL V2.0 자체 모델 조립</p>
+              <h2>AFL V2.0 모델 조립</h2>
+              <p>커버류 별도 설계·제작</p>
             </div>
-            <div class="branch-date">2026-06</div>
+            <div class="branch-date"><span class="branch-date-text">2026-06</span></div>
             <div class="branch-stem" aria-hidden="true"></div>
-            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8l6-3 6 3v8l-6 3-6-3zM6 8l6 3 6-3M12 11v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="branch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16l6-6 4 4-6 6H4zM13 7l4-4 4 4-4 4zM14 14l4 4M16 12l4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
             <div class="branch-dot" aria-hidden="true"></div>
           </article>
         </div>

@@ -31,6 +31,7 @@ class HistoryItem:
     description: str
     sort_key: tuple[int, int, int]
     score: int
+    category: str = ""
 
 
 @dataclass(frozen=True)
@@ -39,6 +40,7 @@ class Milestone:
     title: str
     summary: str
     sort_key: tuple[int, int, int]
+    category: str = ""
 
 
 @dataclass(frozen=True)
@@ -51,6 +53,7 @@ class ProjectConfig:
     output: Path
     style: str
     limit: int
+    show_category: bool
 
 
 KEYWORDS = {
@@ -139,26 +142,57 @@ def compact_label(value: str, max_length: int) -> str:
     text = text.replace("AFL 로드맵 V1.5~V3", "AFL 로드맵 수립")
     text = text.replace("AFL 로드맵 수립.0", "AFL 로드맵 수립")
     if len(text) <= max_length:
-        return text
+        return trim_dangling_suffix(text)
 
-    cut_points = [text.rfind(separator, 0, max_length + 1) for separator in [",", "·", " / ", " 및 ", "와 ", "과 "]]
+    cut_points = [
+        text.rfind(separator, 0, max_length + 1)
+        for separator in [",", "·", " / ", " 및 ", "와 ", "과 ", " 완료", " 시작", " 측정", " 개발", " 테스트", " 의뢰"]
+    ]
     cut_at = max(cut_points)
     if cut_at >= max_length // 2:
-        return text[:cut_at].strip(" ,·/")
-    return f"{text[: max_length - 1].rstrip(' ,·/')}…"
+        return trim_dangling_suffix(text[:cut_at].strip(" ,·/"))
+    return f"{trim_dangling_suffix(text[: max_length - 1].rstrip(' ,·/'))}…"
+
+
+def trim_dangling_suffix(value: str) -> str:
+    text = normalize_text(value).rstrip(" ,·/-")
+    for suffix in (" 의", " 및", " 과", " 와", " 또는"):
+        if text.endswith(suffix):
+            return text[: -len(suffix)].rstrip(" ,·/-")
+    return text
 
 
 def compact_summary(value: str, max_length: int = SUMMARY_MAX_CHARS) -> str:
     text = normalize_text(value)
     if len(text) <= max_length:
-        return text
+        return trim_dangling_suffix(text)
 
-    separators = [",", "·", "/", " 및 ", " 또는 ", " 완료", " 적용", " 개선"]
+    separators = [
+        ",",
+        "·",
+        "/",
+        " 및 ",
+        " 또는 ",
+        " 완료",
+        " 완성",
+        " 성공",
+        " 적용",
+        " 개선",
+        " 구축",
+        " 개발",
+        " 테스트",
+        " 의뢰",
+        " 납품",
+        " 양산",
+        " 저하",
+        " 요청",
+        " 협의",
+    ]
     cut_points = [text.rfind(separator, 0, max_length + 1) for separator in separators]
     cut_at = max(cut_points)
     if cut_at >= max_length // 2:
-        return text[:cut_at].strip(" ,·/")
-    return text[:max_length].rstrip(" ,·/")
+        return trim_dangling_suffix(text[:cut_at].strip(" ,·/"))
+    return trim_dangling_suffix(text[:max_length].rstrip(" ,·/"))
 
 
 def has_bad_spacing(value: str) -> bool:
@@ -242,6 +276,7 @@ def project_from_dict(raw: dict) -> ProjectConfig:
     output = resolve_project_path(raw.get("output"), ROOT / slug / "index.html")
     style = str(raw.get("style") or "branch-clean").strip()
     limit = int(raw.get("limit") or 10)
+    show_category = bool(raw.get("show_category", False))
     return ProjectConfig(
         slug=slug,
         name=name,
@@ -251,6 +286,7 @@ def project_from_dict(raw: dict) -> ProjectConfig:
         output=output,
         style=style,
         limit=limit,
+        show_category=show_category,
     )
 
 
@@ -359,6 +395,24 @@ def pick_description_property(properties: dict, date_name: str | None, title_nam
     return None
 
 
+def pick_category_property(properties: dict, date_name: str | None, title_name: str | None, description_name: str | None) -> str | None:
+    configured = env_value("NOTION_CATEGORY_PROPERTY", "AFL_NOTION_CATEGORY_PROPERTY")
+    if configured and configured in properties:
+        return configured
+
+    skip_names = {date_name, title_name, description_name}
+    hints = ("선택", "분류", "카테고리", "category", "type", "group")
+    for name, prop in properties.items():
+        if name in skip_names:
+            continue
+        if prop.get("type") in {"select", "status", "multi_select"} and notion_property_value(prop) and any(hint in name.lower() for hint in hints):
+            return name
+    for name, prop in properties.items():
+        if name not in skip_names and prop.get("type") in {"select", "status", "multi_select"} and notion_property_value(prop):
+            return name
+    return None
+
+
 def page_to_history_item(page: dict) -> HistoryItem | None:
     properties = page.get("properties", {})
     date_name = pick_property(
@@ -374,16 +428,18 @@ def page_to_history_item(page: dict) -> HistoryItem | None:
         ("제목", "타이틀", "title", "name", "이름"),
     )
     description_name = pick_description_property(properties, date_name, title_name)
+    category_name = pick_category_property(properties, date_name, title_name, description_name)
 
     raw_date = notion_property_value(properties[date_name]) if date_name else ""
     title = notion_property_value(properties[title_name]) if title_name else ""
+    category = notion_property_value(properties[category_name]) if category_name else ""
 
     if description_name and description_name in properties:
         description = notion_property_value(properties[description_name])
     else:
         description_parts = []
         for name, prop in properties.items():
-            if name in {date_name, title_name}:
+            if name in {date_name, title_name, category_name}:
                 continue
             value = notion_property_value(prop)
             if value:
@@ -403,6 +459,7 @@ def page_to_history_item(page: dict) -> HistoryItem | None:
         description=description,
         sort_key=parse_date(raw_date),
         score=score_item(raw_date, title, description),
+        category=category,
     )
 
 
@@ -429,9 +486,41 @@ def load_notion_items(database_id: str | None = None) -> list[HistoryItem]:
     return sorted(items, key=lambda item: item.sort_key)
 
 
-def select_milestones(items: list[HistoryItem], limit: int) -> list[HistoryItem]:
+def select_milestones(items: list[HistoryItem], limit: int, balance_categories: bool = False) -> list[HistoryItem]:
     if len(items) <= limit:
         return items
+
+    categories = [item.category for item in items if item.category]
+    if balance_categories and len(set(categories)) > 1:
+        selected: list[HistoryItem] = []
+        used: set[HistoryItem] = set()
+        by_category: dict[str, list[HistoryItem]] = {}
+        for item in items:
+            by_category.setdefault(item.category or "기타", []).append(item)
+
+        for category_items in by_category.values():
+            starter = min(category_items, key=lambda item: item.sort_key)
+            selected.append(starter)
+            used.add(starter)
+            if len(selected) == limit:
+                return sorted(selected, key=lambda item: item.sort_key)
+
+        for category_items in by_category.values():
+            winner = max(category_items, key=lambda item: (item.score, item.sort_key))
+            if winner in used:
+                continue
+            selected.append(winner)
+            used.add(winner)
+            if len(selected) == limit:
+                return sorted(selected, key=lambda item: item.sort_key)
+
+        for item in sorted(items, key=lambda value: (value.score, value.sort_key), reverse=True):
+            if item not in used:
+                selected.append(item)
+                used.add(item)
+            if len(selected) == limit:
+                break
+        return sorted(selected[:limit], key=lambda item: item.sort_key)
 
     preferred_titles = PREFERRED_TITLES_10 if limit == 10 else PREFERRED_TITLES
     preferred = [item for title in preferred_titles for item in items if item.title == title]
@@ -506,6 +595,7 @@ def fallback_milestones(items: list[HistoryItem]) -> list[Milestone]:
                 title=compact_title(item.title),
                 summary=compact_summary(summary),
                 sort_key=item.sort_key,
+                category=item.category,
             )
         )
     return milestones
@@ -567,6 +657,7 @@ def ask_llm_for_milestones(items: list[HistoryItem], limit: int) -> list[Milesto
             "date": compact_date(item.raw_date, item.sort_key),
             "title": item.title,
             "description": item.description,
+            "category": item.category,
         }
         for index, item in enumerate(items)
     ]
@@ -613,10 +704,7 @@ def ask_llm_for_milestones(items: list[HistoryItem], limit: int) -> list[Milesto
         date = compact_date(items[index].raw_date, sort_keys[index])
         title = normalize_text(str(item.get("title", "")))
         summary = normalize_text(str(item.get("summary", "")))
-        if not date or not title or not summary:
-            return None
-        if has_bad_spacing(title) or has_bad_spacing(summary):
-            print("LLM response had poor Korean spacing, using fallback summaries.")
+        if not title or not summary:
             return None
         milestones.append(
             Milestone(
@@ -624,6 +712,7 @@ def ask_llm_for_milestones(items: list[HistoryItem], limit: int) -> list[Milesto
                 title=compact_label(title, 18),
                 summary=compact_summary(summary),
                 sort_key=sort_keys[index],
+                category=items[index].category,
             )
         )
 
@@ -634,6 +723,7 @@ def ask_project_llm_for_milestones(items: list[HistoryItem], limit: int, project
     if not llm_configured():
         return None
 
+    target_count = min(limit, len(items))
     base_url = os.environ["AFL_LLM_BASE_URL"].rstrip("/")
     api_key = os.environ["AFL_LLM_API_KEY"]
     model = discover_model(base_url, api_key)
@@ -646,19 +736,23 @@ def ask_project_llm_for_milestones(items: list[HistoryItem], limit: int, project
             "date": compact_date(item.raw_date, item.sort_key),
             "title": item.title,
             "description": item.description,
+            "category": item.category,
         }
         for index, item in enumerate(items)
     ]
     prompt = {
-        "task": f"{project_name} 히스토리 데이터를 발표용 타임라인 라벨로 축약한다.",
+        "task": f"{project_name} 전체 히스토리 DB에서 발표용 핵심 타임라인 {target_count}개를 선정하고 라벨로 축약한다.",
         "rules": [
-            f"입력 {limit}개 항목을 모두 사용한다. 누락하거나 새 항목을 추가하지 않는다.",
-            "입력 순서를 유지한다.",
-            "date는 입력 값을 그대로 쓴다.",
+            f"전체 입력 row 중에서 가장 중요한 {target_count}개를 selected_index로 선정한다.",
+            "새 항목을 만들지 말고 반드시 입력 row의 index만 사용한다.",
+            "선정 기준은 시작점, 첫 성과, 기술 전환, 로드맵/계획, 양산/납품, 최신 핵심 성과를 우선한다.",
+            "category가 있으면 병렬 과제별 시작점과 핵심 성과가 과도하게 누락되지 않도록 균형 있게 선정한다.",
+            "결과는 시간순으로 정렬한다.",
+            "date는 참고용이며, selected_index가 가리키는 입력 row 기준으로 코드가 다시 확정한다.",
             "title은 14자 이내의 자연스러운 한국어 라벨로 쓴다.",
             "summary는 14자 이내의 구체적인 근거 문장으로 쓴다.",
             "한국어 띄어쓰기를 반드시 지킨다. 단어를 억지로 붙여 쓰지 않는다.",
-            "JSON만 반환한다. 형식: {\"milestones\":[{\"date\":\"YYYY-MM 또는 YYYY년\",\"title\":\"...\",\"summary\":\"...\"}]}",
+            "JSON만 반환한다. 형식: {\"milestones\":[{\"selected_index\":1,\"title\":\"...\",\"summary\":\"...\"}]}",
         ],
         "rows": rows,
     }
@@ -687,27 +781,34 @@ def ask_project_llm_for_milestones(items: list[HistoryItem], limit: int, project
         print(f"LLM response was not valid timeline JSON, using fallback summaries: {error}")
         return None
 
-    sort_keys = [item.sort_key for item in items]
     milestones = []
-    for index, item in enumerate(llm_items[:limit]):
-        date = compact_date(items[index].raw_date, sort_keys[index])
+    used_indexes: set[int] = set()
+    for item in llm_items[:target_count]:
+        try:
+            selected_index = int(item.get("selected_index", 0)) - 1
+        except (TypeError, ValueError):
+            return None
+        if selected_index < 0 or selected_index >= len(items) or selected_index in used_indexes:
+            return None
+        used_indexes.add(selected_index)
+        source_item = items[selected_index]
         title = normalize_text(str(item.get("title", "")))
         summary = normalize_text(str(item.get("summary", "")))
-        if not date or not title or not summary:
-            return None
-        if has_bad_spacing(title) or has_bad_spacing(summary):
-            print("LLM response had poor Korean spacing, using fallback summaries.")
+        if not title or not summary:
             return None
         milestones.append(
             Milestone(
-                raw_date=date,
-                title=compact_summary(title, TITLE_MAX_CHARS),
+                raw_date=compact_date(source_item.raw_date, source_item.sort_key),
+                title=compact_label(title, TITLE_MAX_CHARS),
                 summary=compact_summary(summary),
-                sort_key=sort_keys[index],
+                sort_key=source_item.sort_key,
+                category=source_item.category,
             )
         )
 
-    return milestones if len(milestones) == limit else None
+    if len(milestones) != target_count:
+        return None
+    return sorted(milestones, key=lambda item: item.sort_key)
 
 
 def source_digest(source: Path) -> str:
@@ -821,7 +922,7 @@ def render_html(source: Path, items: list[HistoryItem], milestones: list[Milesto
     }}
 
     main {{
-      width: min(100vw, 1280px);
+      width: min(100vw, 1152px);
       aspect-ratio: 16 / 4;
       margin: 0;
       padding: 0;
@@ -1154,17 +1255,44 @@ def branch_icon_for(item: Milestone) -> str:
     return BRANCH_ICONS["need"]
 
 
-def render_branch_rows(milestones: list[Milestone], clean: bool = False, project_name: str = "AFL") -> str:
+def compact_category(value: str) -> str:
+    text = normalize_text(value)
+    replacements = {
+        "라이트 4족보행로봇": "라이트 4족",
+        "라이온 4족보행로봇": "라이온 4족",
+        "드론용 로봇발(명현교수)": "드론 로봇발",
+        "디든 승월 로봇": "디든 승월",
+        "디든 2족보행로봇": "디든 2족",
+        "2족보행로봇(박해원교수)": "2족 로봇발",
+    }
+    return replacements.get(text, compact_summary(text, 8))
+
+
+def render_branch_rows(milestones: list[Milestone], clean: bool = False, project_name: str = "AFL", show_category: bool = False) -> str:
     colors = (
         ["#334155", "#0f766e", "#2563eb", "#7c3aed", "#0e7490"]
         if clean
         else ["#6f7d94", "#77c9c9", "#f3bf2e", "#ee6d59", "#86c9a3", "#6f9fd8"]
     )
+    category_colors: dict[str, str] = {}
     segments = []
     nodes = []
     for index, item in enumerate(milestones):
         side = "top" if index % 2 else "bottom"
-        color = colors[index % len(colors)]
+        if show_category and item.category:
+            category_colors.setdefault(item.category, colors[len(category_colors) % len(colors)])
+            color = category_colors[item.category]
+        else:
+            color = colors[index % len(colors)]
+        category_label = ""
+        if show_category and item.category:
+            category_label = f'<span class="branch-category">{html.escape(compact_category(item.category))}</span>'
+        date_text = f'<span class="branch-date-text">{html.escape(item.raw_date)}</span>'
+        date_content = (
+            f"{date_text}{category_label}"
+            if side == "top"
+            else f"{category_label}{date_text}"
+        )
         segments.append(
             f"""
           <div class="branch-segment" style="--accent: {color};"></div>"""
@@ -1176,7 +1304,7 @@ def render_branch_rows(milestones: list[Milestone], clean: bool = False, project
               <h2>{html.escape(compact_label(item.title, 24))}</h2>
               <p>{html.escape(item.summary)}</p>
             </div>
-            <div class="branch-date">{html.escape(item.raw_date)}</div>
+            <div class="branch-date">{date_content}</div>
             <div class="branch-stem" aria-hidden="true"></div>
             <div class="branch-icon" aria-hidden="true">{branch_icon_for(item)}</div>
             <div class="branch-dot" aria-hidden="true"></div>
@@ -1194,9 +1322,9 @@ def render_branch_rows(milestones: list[Milestone], clean: bool = False, project
       </div>"""
 
 
-def render_branch_html(source: Path, items: list[HistoryItem], milestones: list[Milestone], used_llm: bool, clean: bool = False, project_name: str = "AFL") -> str:
+def render_branch_html(source: Path, items: list[HistoryItem], milestones: list[Milestone], used_llm: bool, clean: bool = False, project_name: str = "AFL", show_category: bool = False) -> str:
     project_label = html.escape(project_name)
-    branch_rows = render_branch_rows(milestones, clean=clean, project_name=project_name)
+    branch_rows = render_branch_rows(milestones, clean=clean, project_name=project_name, show_category=show_category)
     aspect_ratio = "16 / 4.16" if clean else "16 / 4"
     body_background = "#f8fafc" if clean else "radial-gradient(circle at 12% 24%, rgba(255,255,255,0.54), transparent 24%), linear-gradient(135deg, #fbf3e6, #efe4d4)"
     paper = "#ffffff" if clean else "#f5ecdf"
@@ -1207,7 +1335,7 @@ def render_branch_html(source: Path, items: list[HistoryItem], milestones: list[
     axis_height = "20px" if clean else "24px"
     date_size = "14px" if clean else "17px"
     top_date = "calc(50% + 22px)" if clean else "calc(50% + 25px)"
-    bottom_date = "calc(50% - 37px)" if clean else "calc(50% - 47px)"
+    bottom_date = "calc(50% - 49px)" if clean else "calc(50% - 59px)"
     copy_width = "min(174px, calc(100% + 58px))" if clean else "min(164px, calc(100% + 64px))"
     copy_h2_size = "13px" if clean else "14px"
     copy_p_size = "10.5px" if clean else "10.2px"
@@ -1257,7 +1385,7 @@ def render_branch_html(source: Path, items: list[HistoryItem], milestones: list[
     }}
 
     main {{
-      width: min(100vw, 1280px);
+      width: min(100vw, 1152px);
       aspect-ratio: {aspect_ratio};
       margin: 0;
       padding: 0;
@@ -1318,17 +1446,25 @@ def render_branch_html(source: Path, items: list[HistoryItem], milestones: list[
     .branch-date {{
       position: absolute;
       left: 50%;
-      display: block;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
       padding: 0 4px;
       color: var(--accent);
-      font-size: {date_size};
       line-height: 1;
-      font-weight: 950;
-      letter-spacing: 0;
-      text-shadow: 0 2px 0 rgba(255,255,255,0.5);
       white-space: nowrap;
       transform: translateX(-50%);
       z-index: 4;
+    }}
+
+    .branch-date-text {{
+      display: block;
+      color: var(--accent);
+      font-size: {date_size};
+      font-weight: 950;
+      letter-spacing: 0;
+      text-shadow: 0 2px 0 rgba(255,255,255,0.5);
     }}
 
     .bottom .branch-date {{
@@ -1370,8 +1506,20 @@ def render_branch_html(source: Path, items: list[HistoryItem], milestones: list[
     .top .branch-copy {{ top: 11px; }}
     .bottom .branch-copy {{ bottom: 12px; }}
 
+    .branch-category {{
+      display: inline-block;
+      padding: 1px 5px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--accent), #ffffff 82%);
+      color: var(--accent);
+      font-size: 8px;
+      line-height: 1.25;
+      font-weight: 900;
+      white-space: nowrap;
+    }}
+
     .branch-copy h2 {{
-      margin: 0 0 6px;
+      margin: 0 0 4px;
       color: var(--accent);
       font-size: {copy_h2_size};
       line-height: 1.14;
@@ -1509,6 +1657,7 @@ def build_history(
     limit: int,
     project_name: str,
     no_llm: bool,
+    show_category: bool = False,
 ) -> None:
     use_notion = source_type == "notion" or (source_type == "auto" and notion_configured())
     items = load_notion_items(notion_database_id) if use_notion else load_items(source)
@@ -1516,14 +1665,17 @@ def build_history(
         source_name = "Notion database" if use_notion else str(source)
         raise SystemExit(f"No history rows found in {source_name}")
 
-    selected = select_milestones(items, limit)
-    llm_milestones = None if no_llm else ask_project_llm_for_milestones(selected, limit, project_name)
-    milestones = llm_milestones or fallback_milestones(selected)
+    llm_milestones = None if no_llm else ask_project_llm_for_milestones(items, limit, project_name)
+    if llm_milestones:
+        milestones = llm_milestones
+    else:
+        selected = select_milestones(items, limit, balance_categories=show_category)
+        milestones = fallback_milestones(selected)
     output.parent.mkdir(parents=True, exist_ok=True)
     if style == "branch-clean":
-        rendered = render_branch_html(source, items, milestones, used_llm=bool(llm_milestones), clean=True, project_name=project_name)
+        rendered = render_branch_html(source, items, milestones, used_llm=bool(llm_milestones), clean=True, project_name=project_name, show_category=show_category)
     elif style == "branch":
-        rendered = render_branch_html(source, items, milestones, used_llm=bool(llm_milestones), project_name=project_name)
+        rendered = render_branch_html(source, items, milestones, used_llm=bool(llm_milestones), project_name=project_name, show_category=show_category)
     else:
         rendered = render_html(source, items, milestones, used_llm=bool(llm_milestones), project_name=project_name)
     output.write_text(rendered, encoding="utf-8")
@@ -1565,6 +1717,7 @@ def main() -> None:
                 limit=project.limit,
                 project_name=project.name,
                 no_llm=args.no_llm,
+                show_category=project.show_category,
             )
         return
 
@@ -1577,6 +1730,7 @@ def main() -> None:
         limit=args.limit,
         project_name=args.project_name,
         no_llm=args.no_llm,
+        show_category=False,
     )
 
 
