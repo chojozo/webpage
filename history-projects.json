@@ -1,11 +1,11 @@
 {
   "projects": [
     {
-      "slug": "afl2",
+      "slug": "afl",
       "name": "AFL",
       "source_type": "notion",
       "notion_database_id": "382b89a3c13380a68912fcb8b4b74e3a",
-      "output": "afl2/index.html",
+      "output": "afl/index.html",
       "style": "branch-clean",
       "limit": 10
     },

@@ -20,7 +20,7 @@ DEFAULT_OUTPUT = ROOT / "afl" / "index.html"
 DEFAULT_NOTION_DATABASE_ID = "382b89a3c13380a68912fcb8b4b74e3a"
 DEFAULT_PROJECT_CONFIG = ROOT / "history-projects.json"
 NOTION_API_VERSION = "2022-06-28"
-SUMMARY_MAX_CHARS = 14
+SUMMARY_MAX_CHARS = 18
 TITLE_MAX_CHARS = 14
 
 
@@ -139,6 +139,8 @@ def normalize_text(value: str) -> str:
 def compact_label(value: str, max_length: int) -> str:
     text = normalize_text(value)
     text = text.replace("Mulit", "Multi")
+    text = text.replace("AGV Feasibility", "AGV 타당성")
+    text = text.replace("Feasibility", "타당성")
     text = text.replace("AFL 로드맵 V1.5~V3", "AFL 로드맵 수립")
     text = text.replace("AFL 로드맵 수립.0", "AFL 로드맵 수립")
     if len(text) <= max_length:
@@ -151,15 +153,31 @@ def compact_label(value: str, max_length: int) -> str:
     cut_at = max(cut_points)
     if cut_at >= max_length // 2:
         return trim_dangling_suffix(text[:cut_at].strip(" ,·/"))
-    return trim_dangling_suffix(text[:max_length].rstrip(" ,·/….-"))
+    return trim_dangling_suffix(safe_truncate(text, max_length))
 
 
 def trim_dangling_suffix(value: str) -> str:
     text = normalize_text(value).replace("...", "").replace("…", "").rstrip(" ,·/-")
-    for suffix in (" 의", " 및", " 과", " 와", " 또는"):
+    for suffix in (" 의", " 및", " 과", " 와", " 또는", " 계", " 기"):
         if text.endswith(suffix):
             return text[: -len(suffix)].rstrip(" ,·/-")
     return text
+
+
+def safe_truncate(value: str, max_length: int) -> str:
+    text = normalize_text(value).rstrip(" ,·/….-")
+    if len(text) <= max_length:
+        return text
+
+    candidate = text[:max_length].rstrip(" ,·/….-")
+    next_char = text[max_length : max_length + 1]
+    if next_char and re.search(r"[A-Za-z0-9가-힣]", next_char):
+        space_at = candidate.rfind(" ")
+        middle_dot_at = candidate.rfind("·")
+        cut_at = max(space_at, middle_dot_at)
+        if cut_at >= max_length // 2:
+            candidate = candidate[:cut_at]
+    return candidate.rstrip(" ,·/….-")
 
 
 def compact_summary(value: str, max_length: int = SUMMARY_MAX_CHARS) -> str:
@@ -184,6 +202,7 @@ def compact_summary(value: str, max_length: int = SUMMARY_MAX_CHARS) -> str:
         " 의뢰",
         " 납품",
         " 양산",
+        " 기대",
         " 저하",
         " 요청",
         " 협의",
@@ -192,7 +211,7 @@ def compact_summary(value: str, max_length: int = SUMMARY_MAX_CHARS) -> str:
     cut_at = max(cut_points)
     if cut_at >= max_length // 2:
         return trim_dangling_suffix(text[:cut_at].strip(" ,·/"))
-    return trim_dangling_suffix(text[:max_length].rstrip(" ,·/"))
+    return trim_dangling_suffix(safe_truncate(text, max_length))
 
 
 def has_bad_spacing(value: str) -> bool:
@@ -751,7 +770,7 @@ def ask_project_llm_for_milestones(items: list[HistoryItem], limit: int, project
             "결과는 시간순으로 정렬한다.",
             "date는 참고용이며, selected_index가 가리키는 입력 row 기준으로 코드가 다시 확정한다.",
             "title은 14자 이내의 자연스러운 한국어 라벨로 쓴다.",
-            "summary는 14자 이내의 구체적인 근거 문장으로 쓴다.",
+            "summary는 18자 이내의 구체적인 근거 문장으로 쓴다.",
             "말줄임표(... 또는 …)를 절대 쓰지 않는다. 길면 더 짧은 단어로 다시 요약한다.",
             "한국어 띄어쓰기를 반드시 지킨다. 단어를 억지로 붙여 쓰지 않는다.",
             "JSON만 반환한다. 형식: {\"milestones\":[{\"selected_index\":1,\"title\":\"...\",\"summary\":\"...\"}]}",
