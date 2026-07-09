@@ -27,6 +27,42 @@
       "output": "minifarm/index.html",
       "style": "branch-clean",
       "limit": 10
+    },
+    {
+      "slug": "foldingmodule",
+      "name": "FoldingModule",
+      "source_type": "notion",
+      "notion_database_id": "388b89a3c1338031aabcf331800f6bd4",
+      "output": "foldingmodule/index.html",
+      "style": "branch-clean",
+      "limit": 10
+    },
+    {
+      "slug": "c2b",
+      "name": "C2B",
+      "source_type": "notion",
+      "notion_database_id": "37ab89a3c133804a81dbdc0a3cc36a4e",
+      "output": "c2b/index.html",
+      "style": "branch-clean",
+      "limit": 10
+    },
+    {
+      "slug": "aether",
+      "name": "Aether",
+      "source_type": "notion",
+      "notion_database_id": "38bb89a3c133803c8b49d261a5262c2b",
+      "output": "aether/index.html",
+      "style": "branch-clean",
+      "limit": 10
+    },
+    {
+      "slug": "tactilesensor",
+      "name": "TactileSensor",
+      "source_type": "notion",
+      "notion_database_id": "387b89a3c13380e3be8afaf04dba3919",
+      "output": "tactilesensor/index.html",
+      "style": "branch-clean",
+      "limit": 10
     }
   ]
 }
