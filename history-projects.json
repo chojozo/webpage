@@ -72,6 +72,15 @@
       "output": "dandelion/index.html",
       "style": "branch-clean",
       "limit": 10
+    },
+    {
+      "slug": "artificialmuscle",
+      "name": "ArtificialMuscle",
+      "source_type": "notion",
+      "notion_database_id": "38db89a3c13380bc8667d9835a441ffa",
+      "output": "artificialmuscle/index.html",
+      "style": "branch-clean",
+      "limit": 10
     }
   ]
 }
