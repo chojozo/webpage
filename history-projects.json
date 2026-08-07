@@ -63,6 +63,15 @@
       "output": "tactilesensor/index.html",
       "style": "branch-clean",
       "limit": 10
+    },
+    {
+      "slug": "dandelion",
+      "name": "Dandelion",
+      "source_type": "notion",
+      "notion_database_id": "388b89a3c13380b78156de4ba9a45ec2",
+      "output": "dandelion/index.html",
+      "style": "branch-clean",
+      "limit": 10
     }
   ]
 }
