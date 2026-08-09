@@ -81,6 +81,15 @@
       "output": "artificialmuscle/index.html",
       "style": "branch-clean",
       "limit": 10
+    },
+    {
+      "slug": "rds",
+      "name": "RDS",
+      "source_type": "notion",
+      "notion_database_id": "3b4b89a3c13380b88bf4dc3346fcb0b6",
+      "output": "rds/index.html",
+      "style": "branch-clean",
+      "limit": 10
     }
   ]
 }
