@@ -1,77 +1,24 @@
-# History Diagram Pages
+# 퓨처랩스 랩별 핵심 히스토리 타임라인
 
-## Project config workflow
+각 랩의 Notion 소개 페이지에 임베드하는 타임라인 페이지입니다.
 
-Project DBs are managed in `history-projects.json`.
+| 랩 | 주소 |
+|---|---|
+| Mobile Robot Platform | https://chojozo.github.io/webpage/mrp |
+| Robofoot | https://chojozo.github.io/webpage/robofoot |
+| Minifarm | https://chojozo.github.io/webpage/minifarm |
+| Folding Module | https://chojozo.github.io/webpage/foldingmodule |
+| C2B | https://chojozo.github.io/webpage/c2b |
+| Aether | https://chojozo.github.io/webpage/aether |
+| Tactile Sensor | https://chojozo.github.io/webpage/tactilesensor |
+| Dandelion | https://chojozo.github.io/webpage/dandelion |
+| Artificial Muscle | https://chojozo.github.io/webpage/artificialmuscle |
+| RDS | https://chojozo.github.io/webpage/rds |
 
-Build one page:
+## 자동 갱신
 
-```powershell
-python .\scripts\build_history.py --project robofoot
-```
+이 저장소의 페이지는 **사내 맥미니가 매주 월요일에 자동으로 다시 만들어 올립니다.**
+(맥미니 `hwjo` 계정 `~/agents/projects/futurelabs-history` — 각 랩 Notion 히스토리 DB → 사내 LLM 요약 → 이 저장소에 push)
 
-Build every configured page:
-
-```powershell
-python .\scripts\build_history.py --project all
-```
-
-Put `NOTION_TOKEN`, `AFL_LLM_BASE_URL`, `AFL_LLM_API_KEY`, and `AFL_LLM_MODEL` in local `.env`. To add another page, add one object to `history-projects.json` with `slug`, `name`, `notion_database_id`, `output`, `style`, and `limit`.
-
-Notion DB를 읽어서 히스토리 다이어그램 HTML을 생성합니다.
-
-GitHub Pages가 `main` 브랜치의 저장소 루트를 바라보면 아래처럼 배포됩니다.
-
-- `mrp/index.html` -> `https://chojozo.github.io/webpage/mrp` (기존 `afl` 주소는 자동 이동)
-- `sample/index.html` -> `https://chojozo.github.io/webpage/sample`
-
-## 로컬 실행
-
-Notion Integration을 만들고, 대상 DB에 해당 Integration을 공유한 뒤 실행합니다.
-
-```powershell
-$env:NOTION_TOKEN = "secret_xxx"
-python .\scripts\build_history.py --source-type notion --output mrp\index.html
-```
-
-다른 페이지를 추가할 때는 출력 폴더만 바꾸면 됩니다.
-
-```powershell
-$env:NOTION_TOKEN = "secret_xxx"
-python .\scripts\build_history.py --source-type notion --notion-database-id "NOTION_DB_ID" --output new-page\index.html
-```
-
-속성명을 자동 추론하기 어렵다면 아래 값을 지정할 수 있습니다.
-
-```powershell
-$env:NOTION_DATE_PROPERTY = "날짜"
-$env:NOTION_TITLE_PROPERTY = "제목"
-$env:NOTION_DESCRIPTION_PROPERTY = "내용"
-```
-
-## GitHub Actions 수동 업데이트
-
-`.github/workflows/update-history.yml`은 자동 스케줄 없이 수동 실행만 합니다.
-
-1. GitHub 저장소 `Settings > Pages`에서 `Deploy from a branch`를 선택합니다.
-2. Branch는 `main`, folder는 `/root`로 설정합니다.
-3. `Settings > Secrets and variables > Actions`에 `NOTION_TOKEN`을 등록합니다.
-4. `Actions > Update AFL history diagram > Run workflow`를 누릅니다.
-5. `slug`에 URL 경로를 입력합니다. 예: `mrp`
-6. `notion_database_id`에 DB ID 또는 URL을 넣습니다. 비우면 기본 AFL DB를 사용합니다.
-
-워크플로가 실행되면 `{slug}/index.html`을 생성하고 변경사항을 자동 커밋/푸시합니다.
-
-## 사내 LLM 요약
-
-사내 LLM은 OpenAI 호환 `POST /v1/chat/completions` 형식으로 호출합니다. 키는 코드에 저장하지 말고 환경변수나 GitHub Secrets에 넣습니다.
-
-```powershell
-$env:AFL_LLM_BASE_URL = "http://192.168.1.128:9800"
-$env:AFL_LLM_API_KEY = "발급받은 키"
-$env:AFL_LLM_MODEL = "모델명"
-$env:AFL_LLM_TIMEOUT = "90"
-python .\scripts\build_history.py --source-type notion --output mrp\index.html
-```
-
-LLM 연결이 실패하거나 결과 품질 검사를 통과하지 못하면 규칙 기반 요약으로 자동 생성합니다. LLM을 끄려면 `--no-llm`을 사용합니다.
+- 여기서 페이지를 직접 고치면 다음 주 실행 때 덮어써집니다. 문구는 Notion 원문을 고치세요.
+- 랩 추가 · 이름 · 주소 변경은 맥미니 프로젝트의 `history-projects.json` 에서 합니다.
