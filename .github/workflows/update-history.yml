@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       slug:
-        description: "URL path under GitHub Pages, for example afl"
+        description: "URL path under GitHub Pages, for example mrp"
         required: true
-        default: "afl"
+        default: "mrp"
       notion_database_id:
         description: "Notion database id or URL. Empty uses NOTION_DATABASE_ID secret or the AFL default."
         required: false
